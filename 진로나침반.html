@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>나의 진로 나침반</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;600;800&display=swap" rel="stylesheet">
+<script type="application/json" id="cfg">{"roster":[],"teachers":[]}</script>
+<style>
+/* VOICE: 친절하고 또렷한 학교용 도구, 군더더기 없이
+   IDEA: 나침반 — 7개 계열이 바늘의 방향
+   PICTURE: 7색 정칠각형 나침반, 결과에서는 레이더 그래프가 같은 도형으로 이어짐
+   COLOUR and TYPE: 흰 바탕, 인디고 주색, 코럴 포인트, 계열별 7색 / Gothic A1
+   LAYOUT: 한 열 중심, 넓은 화면에서 2열, 600px 이하 세로 쌓기 */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0f1324);--soft:light-dark(#f2f4fc,#181e36);--line:light-dark(#e1e5f2,#2a3152);--ink:light-dark(#151b34,#eef0fa);--mute:light-dark(#5d6782,#a3abc6);--pri:light-dark(#3a4bc9,#8c9bff);--priInk:light-dark(#ffffff,#0f1324);--acc:#ff6b4a;--band:light-dark(#2b3aa8,#1b2360)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);word-break:keep-all;font:16px/1.6 'Gothic A1',system-ui,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;overflow-x:clip}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;border-radius:12px;padding:12px 18px;min-height:44px;font-weight:800;background:var(--soft);color:var(--ink)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+button:disabled{opacity:.4;cursor:default}
+.pri{background:var(--pri);color:var(--priInk)}.ghost{background:transparent;border:1px solid var(--line)}
+.wrap{max-width:1080px;margin:auto;padding:0 max(4vw,16px)}
+header.top{border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:64px;flex-wrap:wrap}
+.brand{font-weight:800;font-size:18px;display:flex;align-items:center;gap:10px}
+.nav{display:flex;gap:6px;flex-wrap:wrap}.nav a{color:var(--mute);text-decoration:none;font-weight:600;padding:10px 12px;border-radius:10px;font-size:14px}.nav a.on{background:var(--soft);color:var(--ink)}
+h1{font-size:clamp(30px,5vw,46px);line-height:1.1;margin:0 0 14px;text-wrap:balance;font-weight:800}
+h2{font-size:24px;line-height:1.25;margin:0 0 12px;font-weight:800}
+h3{font-size:18px;margin:0 0 6px}
+p{margin:0 0 12px}.mute{color:var(--mute)}.small{font-size:13px;color:var(--mute)}
+.hidden{display:none!important}
+section.view{padding:clamp(24px,4vw,52px) 0 80px}
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:center}
+.compass{width:100%;max-width:440px;aspect-ratio:1;justify-self:center}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:clamp(18px,3vw,28px)}
+label{font-weight:600;font-size:14px;display:block;margin-bottom:6px}
+input[type=text],select,textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:16px}
+.idbig{font-size:28px!important;font-weight:800;letter-spacing:.12em;text-align:center}
+.parsed{min-height:24px;margin:8px 0 14px;font-weight:600;color:var(--pri);text-align:center}
+.pwin{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:16px}
+.trait{background:var(--soft);border-radius:12px;padding:12px 14px;font-size:14px;margin:6px 0 10px}
+.mj{border-top:1px solid var(--line);padding:9px 0}.mj b{font-size:15px}.mj p{font-size:13px;color:var(--mute);margin:2px 0}.mj .u{font-size:12.5px;font-weight:700;color:var(--c)}
+.top3 .sub{margin-top:14px}
+.others{margin-top:32px}.others details{border:1px solid var(--line);border-left:6px solid var(--c);border-radius:14px;padding:2px 16px;margin-bottom:10px}.others summary{cursor:pointer;font-weight:800;padding:12px 0}.others .in{padding-bottom:14px;max-width:760px}
+.err{color:#d13a3a;font-weight:700;min-height:22px;margin:8px 0 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row>button{flex:1 1 160px}
+.facts{display:flex;gap:22px;flex-wrap:wrap;margin:18px 0 22px}.facts b{display:block;font-size:26px;color:var(--pri)}.facts span{font-size:13px;color:var(--mute)}
+.note{background:var(--soft);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--mute);margin-top:16px}
+/* exam */
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 0}
+.bar .wrap{display:flex;gap:14px;align-items:center}
+.track{flex:1;height:10px;background:var(--soft);border-radius:10px;overflow:hidden}.track>div{height:100%;background:var(--pri);transition:width .2s}
+.q{padding:22px 0;border-bottom:1px solid var(--line)}
+.qt{font-weight:700;font-size:17px;margin-bottom:14px}.qt i{font-style:normal;color:var(--mute);margin-right:6px}
+.ch{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.ch button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;min-height:68px;font-size:12px;font-weight:600;color:var(--mute);background:var(--soft);border:2px solid transparent;line-height:1.3}
+.ch button b{font-size:19px;color:var(--ink)}
+.ch button.sel{border-color:var(--pri);color:var(--pri);background:light-dark(#e8ebff,#232c5c)}.ch button.sel b{color:var(--pri)}
+.ctrl{display:flex;justify-content:space-between;gap:10px;margin-top:24px}.ctrl button{flex:0 1 220px}
+/* result */
+.rtop{background:var(--band);color:#fff;padding:clamp(26px,4vw,44px) 0}
+.rtop h1{color:#fff}.rtop p{color:#dfe3ff}
+.rgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(20px,4vw,48px);align-items:center;margin-top:28px}
+.radar{width:100%;max-width:560px;justify-self:center}
+.sc{margin:0 0 14px}.sc .l{display:flex;justify-content:space-between;font-weight:700;margin-bottom:6px;gap:10px}.sc .l span:last-child{font-variant-numeric:tabular-nums;white-space:nowrap}
+.sc .t{height:12px;background:var(--soft);border-radius:12px;overflow:hidden}.sc .t>div{height:100%;border-radius:12px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:8px;vertical-align:1px}
+.tops{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+.top3{border:1px solid var(--line);border-top:6px solid var(--c);border-radius:16px;padding:18px}
+.top3 .rk{font-size:13px;color:var(--mute);font-weight:700}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}.tag{background:var(--soft);border-radius:8px;padding:5px 9px;font-size:13px}
+.sub{font-weight:700;font-size:13px;margin-top:4px}
+.code{font-size:clamp(18px,3.4vw,26px);font-weight:800;letter-spacing:.06em;padding:14px;border:2px dashed var(--pri);border-radius:12px;text-align:center;user-select:all;overflow-wrap:anywhere}
+.cols2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:22px}
+.msg{font-weight:700;color:var(--pri);min-height:22px;margin-top:8px}
+/* teacher */
+textarea{min-height:140px;resize:vertical;font-size:15px}
+.tstats{display:flex;gap:24px;flex-wrap:wrap;margin:6px 0 16px}.tstats b{display:block;font-size:28px;color:var(--pri)}.tstats span{font-size:13px;color:var(--mute)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{background:var(--soft);font-weight:700}td.n{text-align:right;font-variant-numeric:tabular-nums}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.filters select{width:auto;min-width:130px}
+.dist .sc .t>div{background:var(--pri)}
+.confirm{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding:12px;border-radius:12px;background:light-dark(#fff1ed,#3a1d18)}
+footer{border-top:1px solid var(--line);padding:22px 0;font-size:13px;color:var(--mute);text-align:center}
+@media(max-width:820px){.hero,.rgrid,.cols2{grid-template-columns:minmax(0,1fr)}.tops{grid-template-columns:minmax(0,1fr)}.compass{max-width:320px;order:-1}}
+@media(max-width:600px){.ch button{font-size:10.5px;min-height:64px;padding:8px 2px}.ch button b{font-size:17px}.idbig{font-size:24px!important}}
+@media(prefers-reduced-motion:no-preference){.needle{transform-origin:220px 220px;animation:sway 5s ease-in-out infinite}@keyframes sway{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(22deg)}}}
+</style><style>
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.st-done{background:light-dark(#e3f6ec,#173a2a);color:light-dark(#137a46,#7fe0aa)}.st-doing{background:light-dark(#fff3dc,#3a2f15);color:light-dark(#a86400,#ffc861)}.st-new{background:var(--soft);color:var(--mute)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0}.kpi{background:var(--soft);border-radius:14px;padding:14px 16px}.kpi b{display:block;font-size:30px;line-height:1.1;color:var(--ink)}.kpi span{font-size:13px;color:var(--mute)}
+.kpi.done b{color:light-dark(#137a46,#7fe0aa)}.kpi.doing b{color:light-dark(#a86400,#ffc861)}
+.live{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--mute)}.live i{width:9px;height:9px;border-radius:50%;background:#20b26b;display:inline-block}.live.off i{background:#aab}
+.classes{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin:8px 0 18px}.cls{border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:var(--bg);text-align:left;font-weight:600;min-height:auto}.cls.on{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri) inset}
+.cls .t{height:8px;background:var(--soft);border-radius:8px;overflow:hidden;margin-top:8px;display:flex}.cls .t i{display:block;height:100%}
+.rosterRow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)}.rosterRow select,.rosterRow input{width:90px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:16px}
+details.box{border:1px solid var(--line);border-radius:16px;padding:4px 18px;margin:16px 0}details.box summary{cursor:pointer;font-weight:800;padding:12px 0}
+.saveState{font-size:13px;color:var(--mute);white-space:nowrap}
+#dlBar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--bg);padding:10px 12px 10px 16px;border-radius:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:calc(100% - 24px);font-size:14px;box-shadow:0 6px 24px #0004}#dlBar a{color:#ffd166;font-weight:800}#dlBar button{min-height:34px;padding:6px 12px;color:var(--bg);border-color:#fff5}#dlBar[hidden]{display:none}
+.tops{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.uni{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 10px;margin-top:6px;font-size:13px}.uni span{font-weight:700;color:var(--c);white-space:nowrap}.uni em{font-style:normal;color:var(--mute)}
+.unote{font-size:12px;color:var(--mute);margin-top:4px}
+button.tag.job{border:1px solid transparent;min-height:36px;padding:6px 11px;font-weight:600;font-size:13px;cursor:pointer;background:var(--soft);color:var(--ink);border-radius:8px}
+button.tag.job.on{border-color:var(--c);color:var(--c);background:var(--bg)}
+.jobDesc{border-left:4px solid var(--c);background:var(--soft);border-radius:0 10px 10px 0;padding:10px 12px;font-size:14px;margin:0 0 12px}.jobDesc b{display:block;margin-bottom:2px}
+.tlist{border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}.tlist .row input{flex:1 1 200px;width:auto}.chk{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.chk label{display:flex;align-items:center;gap:6px;margin:0;font-weight:600;background:var(--soft);padding:7px 10px;border-radius:9px;font-size:13px;cursor:pointer}.chk input{width:16px;height:16px}
+@media(max-width:820px){.tops{grid-template-columns:minmax(0,1fr)!important}}
+td .mini{padding:6px 10px;min-height:34px;font-size:13px;border-radius:9px}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.st-new{background:var(--soft);color:var(--mute)}
+.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="12.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 4l3.2 10H10.8z" fill="#ff6b4a"/><path d="M14 24l-3.2-10h6.4z" fill="currentColor"/></svg>나의 진로 나침반</div>
+<nav class="nav"><a href="javascript:void 0" id="navS">교육생 로그인</a><a href="javascript:void 0" id="navI">강사 로그인</a><a href="javascript:void 0" id="navT">관리자 로그인</a><span id="who" class="small" style="align-self:center"></span><button class="ghost hidden" id="logout" style="min-height:38px;padding:8px 14px">로그아웃</button></nav></div></header>
+
+<section class="view" id="vStart"><div class="wrap hero">
+<div>
+<h1>나에게 어울리는 전공계열 찾기</h1>
+<p class="mute">7개 계열 140문항으로 지금 나의 흥미와 활동 선호를 살펴봅니다. 정답은 없으니 솔직하게 답하세요.</p>
+<div class="facts"><div><b>140</b><span>문항</span></div><div><b>7</b><span>계열</span></div><div><b>약 20분</b><span>소요 시간</span></div></div>
+<div class="card">
+<h2>교육생 로그인</h2>
+<label for="sid">학번 5자리</label>
+<input type="text" id="sid" class="idbig" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="10207">
+<div class="parsed" id="parsed">학년 1자리 + 반 2자리 + 번호 2자리</div>
+<label for="spw">비밀번호</label><input type="password" id="spw" class="pwin" autocomplete="off" placeholder="선생님이 알려 준 비밀번호">
+<div class="row" style="margin-top:14px"><button class="pri" id="btnStart">로그인</button></div>
+<p class="err" id="startErr"></p>
+<div class="note">예: 1학년 2반 7번 → <b>10207</b>, 3학년 10반 3번 → <b>31003</b>. 응답은 이 기기에 저장되어, 같은 기기에서 다시 로그인하면 이어서 할 수 있습니다. 검사를 마치면 나오는 <b>결과 코드</b>를 선생님께 제출하세요.</div>
+</div></div>
+<svg class="compass" viewBox="0 0 440 440" role="img" aria-label="7개 계열 나침반" id="compass"></svg>
+</div></section>
+
+<section id="vExam" class="hidden">
+<div class="bar"><div class="wrap"><b id="pgInfo" style="white-space:nowrap"></b><div class="track"><div id="fill"></div></div><span class="small" id="cnt" style="white-space:nowrap"></span></div></div>
+<div class="wrap" style="max-width:820px;padding-top:18px;padding-bottom:80px">
+<div id="qList"></div>
+<p class="err" id="examErr"></p>
+<div class="ctrl"><button class="ghost" id="prev">← 이전</button><button class="pri" id="next">다음 →</button></div>
+<p class="small" style="margin-top:18px">응답은 고를 때마다 이 기기에 저장됩니다.</p>
+</div></section>
+
+<section id="vResult" class="hidden">
+<div class="rtop"><div class="wrap"><p id="rWho" style="font-weight:700;margin-bottom:6px"></p><h1 id="rTitle"></h1><p id="rSub" style="margin:0"></p></div></div>
+<div class="wrap" style="padding-bottom:70px">
+<div class="rgrid">
+<svg class="radar" id="radar" viewBox="0 0 600 560" role="img" aria-label="7개 계열 레이더 그래프"></svg>
+<div><h2>계열별 관심 점수</h2><p class="small">계열마다 20문항 응답을 0~100점으로 환산했습니다. 중심이 0점, 바깥 칠각형이 100점입니다.</p><div id="rBars"></div></div>
+</div>
+<div class="cols2">
+<div class="card"><h3>선생님께 제출할 결과 코드</h3><p class="small">이 코드를 담당 선생님께 보내야 제출이 완료됩니다.</p><div class="code" id="rCode"></div><div class="row" style="margin-top:12px"><button id="copyCode">코드 복사</button></div><div class="msg" id="codeMsg"></div></div>
+<div class="card"><h3>결과 보관</h3><p class="small">요약 1쪽과 1·2순위 계열 상세 4쪽, 모두 5쪽짜리 결과지입니다.</p><div class="row"><button class="pri" id="pdfBtn">결과 PDF 저장</button></div><div class="msg" id="pdfMsg"></div>
+<div class="row" style="margin-top:10px"><button class="ghost" id="resetBtn">이 기기에서 검사 다시 하기</button></div><div id="resetBox"></div></div>
+</div>
+<h2 style="margin-top:36px">우선 탐색할 계열 1·2순위</h2>
+<div class="tops" id="rTops"></div>
+<div class="others"><h2>다른 계열도 살펴보기</h2><p class="small">3순위 이하 계열의 특성·학과·직업도 눌러서 확인할 수 있어요.</p><div id="rOthers"></div></div>
+<p class="small" style="margin-top:10px">대표대학은 서울권(서울 소재)·국립대·사립대(서울 외 지역)별로 해당 학과를 운영하는 대학의 예시이며 순위가 아닙니다. 학과명과 모집 단위는 대학·연도마다 다르니 지원 전 각 대학 모집요강을 확인하세요.</p>
+<div class="note" style="margin-top:18px">이 검사는 독자 제작한 교육용 자기보고식 문항으로, 표준화된 적성검사·백분위·합격 가능성 예측이 아니며 커리어넷 공식 검사와 무관합니다. 결과는 진로 상담의 보조 자료로 활용하세요.</div>
+</div></section>
+
+<section class="view hidden" id="vTeacherLogin"><div class="wrap" style="max-width:520px">
+<div class="card"><h2>담당반 강사 로그인</h2><p class="small">관리자가 등록한 강사 이메일로 로그인하면 담당반 교육생의 제출 현황과 결과를 볼 수 있습니다.</p>
+<label for="temail">아이디 (강사 이메일)</label><input type="text" id="temail" class="pwin" inputmode="email" autocomplete="username" placeholder="name@example.com">
+<label for="tpw" style="margin-top:10px">비밀번호</label><input type="password" id="tpw" class="pwin" autocomplete="off">
+<div class="row" style="margin-top:14px"><button class="pri" id="tLogin">강사 로그인</button></div><p class="err" id="tErr"></p></div></div></section>
+
+<section class="view hidden" id="vAdminLogin"><div class="wrap" style="max-width:520px">
+<div class="card"><h2>관리자 로그인</h2><p class="small">교육생·강사 화면과 분리된 관리자 전용 페이지입니다.</p>
+<label for="apw">관리자 비밀번호</label><input type="password" id="apw" class="pwin" autocomplete="off">
+<div class="row" style="margin-top:14px"><button class="pri" id="aLogin">관리자 로그인</button></div><p class="err" id="aErr"></p></div></div></section>
+
+<section class="view hidden" id="vAdmin"><div class="wrap">
+<p class="small" id="staffWho" style="font-weight:700;margin:0 0 4px"></p>
+<h1>제출 현황</h1>
+<p class="mute">교육생이 보낸 결과 코드를 붙여 넣으면 제출 여부와 결과가 정리됩니다. 줄바꿈·쉼표·공백 어느 것으로 구분해도 됩니다. 붙여 넣은 코드는 이 브라우저에 남습니다.</p>
+<textarea id="codes" placeholder="10207-261123-…"></textarea>
+<div class="row" style="margin-top:10px"><button class="pri" id="parseBtn">코드 반영하기</button><button class="ghost" id="clearBtn">코드 비우기</button></div>
+<p class="err" id="admErr"></p>
+<div class="kpis" id="kpis"></div>
+<h2 style="margin-top:8px">학급별 제출</h2><p class="small" id="clsHint">학급을 누르면 아래 목록이 그 반으로 걸러집니다.</p>
+<div class="classes" id="classes"></div>
+<div class="filters"><select id="fG"><option value="">전체 학년</option></select><select id="fC"><option value="">전체 반</option></select><select id="fS"><option value="">전체 상태</option><option value="done">제출 완료</option><option value="new">미제출</option></select><input type="text" id="fQ" placeholder="학번 검색" inputmode="numeric" style="width:140px"></div>
+<div class="row" style="margin:6px 0 10px"><button class="pri" id="zipBtn">제출자 결과 PDF 일괄 다운로드 (ZIP)</button><button id="csvBtn">현황 CSV 다운로드</button></div>
+<div class="msg" id="aMsg"></div>
+<div class="scroll"><table><thead><tr><th>학번</th><th>학년</th><th>반</th><th>번호</th><th>상태</th><th>완료일</th><th>1순위</th><th>2순위</th><th>결과</th></tr></thead><tbody id="tBody"></tbody></table></div>
+<div class="rgrid" style="margin-top:30px">
+<div><h2>제출 학생 평균</h2><p class="small">위에서 고른 학년·반 기준입니다.</p><svg class="radar" id="tRadar" viewBox="0 0 600 560" role="img" aria-label="평균 레이더 그래프"></svg></div>
+<div><h2>1순위 계열 분포</h2><div id="tDist"></div></div>
+</div>
+
+<div class="adminOnly">
+<details class="box" id="rosterBox"><summary>학급 편성</summary>
+<p class="small">학급과 인원을 등록하면 미제출 교육생까지 현황에 나오고, 등록된 학번만 교육생 로그인을 할 수 있습니다. 비워 두면 학번 형식만 맞으면 누구나 로그인할 수 있습니다.</p>
+<div id="rosterRows"></div>
+<div class="row" style="margin:12px 0"><button class="ghost" id="addCls" style="flex:none">+ 학급 추가</button></div></details>
+<details class="box" id="teacherBox"><summary>담당반 강사 관리</summary>
+<p class="small">강사 이메일을 등록하고 담당반을 고르면, 그 강사는 <b>이메일 + 비밀번호 1234</b>로 로그인해 담당반만 볼 수 있습니다. 등록되지 않은 이메일은 로그인할 수 없습니다.</p>
+<div id="teacherRows"></div>
+<div class="row" style="margin:12px 0"><button class="ghost" id="addT" style="flex:none">+ 강사 추가</button></div></details>
+<div class="card" style="margin-top:6px"><h3>설정 저장과 배포</h3>
+<p class="small">① <b>이 기기에 저장</b>하면 지금 이 브라우저에 바로 적용됩니다. ② 강사들이 <b>다른 기기에서도 로그인</b>하려면 <b>배포용 HTML 저장</b>으로 설정이 들어간 새 파일을 받아, 기존 파일 대신 올려 주세요(파일 이름은 그대로).</p>
+<div class="row"><button class="pri" id="saveCfg" style="flex:0 1 220px">이 기기에 저장</button><button id="bakeBtn" style="flex:0 1 260px">배포용 HTML 저장</button></div>
+<div class="msg" id="cfgMsg"></div></div>
+</div>
+</div></section>
+
+<div id="dlBar" hidden></div>
+<footer><div class="wrap">독립 제작 교육용 계열 탐색검사 · GoE교육원</div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+{
+const PRISTINE='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+const STUDENT_PW='1234', TEACHER_PW='1234', ADMIN_PW='1201';
+const DATA={"questions": [{"id": 0, "cat": "인문", "text": "소설이나 시를 읽고 등장인물의 마음을 해석하는 일이 흥미롭다."}, {"id": 1, "cat": "사회", "text": "사회에서 일어나는 문제의 원인과 해결책을 찾는 데 관심이 있다."}, {"id": 2, "cat": "공학", "text": "고장 난 물건이 왜 작동하지 않는지 원인을 찾아보고 싶다."}, {"id": 3, "cat": "자연", "text": "자연에서 관찰한 현상이 왜 일어나는지 과학적으로 설명하고 싶다."}, {"id": 4, "cat": "교육", "text": "친구가 이해하지 못한 내용을 쉽게 설명해 주는 것이 좋다."}, {"id": 5, "cat": "예체능", "text": "그림·사진·영상 등으로 나만의 생각을 표현하는 것이 즐겁다."}, {"id": 6, "cat": "의약", "text": "인체의 기관이 어떻게 작동하는지 이해하고 싶다."}, {"id": 7, "cat": "인문", "text": "같은 사건을 다르게 표현한 글을 비교해 보고 싶다."}, {"id": 8, "cat": "사회", "text": "뉴스를 보며 정책이 사람들의 생활에 미치는 영향을 생각한다."}, {"id": 9, "cat": "공학", "text": "새로운 기계나 장치의 작동 원리를 알아보는 것이 재미있다."}, {"id": 10, "cat": "자연", "text": "실험으로 가설을 검증하는 과정이 재미있다."}, {"id": 11, "cat": "교육", "text": "다른 사람이 배우는 과정을 돕는 일에 보람을 느낀다."}, {"id": 12, "cat": "예체능", "text": "음악을 듣거나 연주하며 느낌의 차이를 탐색하고 싶다."}, {"id": 13, "cat": "의약", "text": "질병이 발생하는 원인과 예방 방법이 궁금하다."}, {"id": 14, "cat": "인문", "text": "우리말의 표현이나 단어의 유래를 알아보는 것이 재미있다."}, {"id": 15, "cat": "사회", "text": "사람들의 선택과 소비 행동이 왜 다른지 알아보고 싶다."}, {"id": 16, "cat": "공학", "text": "실생활의 불편을 해결하는 제품을 설계해 보고 싶다."}, {"id": 17, "cat": "자연", "text": "수학 문제의 원리나 증명 과정을 이해하는 것이 좋다."}, {"id": 18, "cat": "교육", "text": "학습자의 수준에 맞춰 설명 방법을 바꿔보고 싶다."}, {"id": 19, "cat": "예체능", "text": "춤이나 움직임으로 감정을 표현하는 활동에 관심이 있다."}, {"id": 20, "cat": "의약", "text": "아픈 사람의 회복을 돕는 일에 관심이 있다."}, {"id": 21, "cat": "인문", "text": "역사적 사건이 일어난 배경과 그 의미를 조사하고 싶다."}, {"id": 22, "cat": "사회", "text": "경제 현상을 그래프나 자료로 해석하는 것이 흥미롭다."}, {"id": 23, "cat": "공학", "text": "코딩을 통해 원하는 기능을 구현하는 활동에 관심이 있다."}, {"id": 24, "cat": "자연", "text": "생물의 구조와 생명 현상에 관심이 있다."}, {"id": 25, "cat": "교육", "text": "어떤 수업 방식이 더 재미있고 효과적인지 궁금하다."}, {"id": 26, "cat": "예체능", "text": "디자인의 색·형태·배치를 바꾸어 새로운 느낌을 만드는 것이 좋다."}, {"id": 27, "cat": "의약", "text": "의료 현장에서 정확한 판단이 왜 중요한지 알고 싶다."}, {"id": 28, "cat": "인문", "text": "외국어를 익혀 다른 문화권의 사람과 소통하고 싶다."}, {"id": 29, "cat": "사회", "text": "법과 제도가 공정하게 작동하는지 토론하고 싶다."}, {"id": 30, "cat": "공학", "text": "여러 부품을 조립해 작동하는 결과물을 만드는 것을 좋아한다."}, {"id": 31, "cat": "자연", "text": "물질이 반응하면서 성질이 달라지는 이유가 궁금하다."}, {"id": 32, "cat": "교육", "text": "친구의 고민을 듣고 스스로 답을 찾도록 돕고 싶다."}, {"id": 33, "cat": "예체능", "text": "작품을 만들 때 독창적인 아이디어를 떠올리는 편이다."}, {"id": 34, "cat": "의약", "text": "약물이 몸에서 작용하는 원리를 탐구하고 싶다."}, {"id": 35, "cat": "인문", "text": "책이나 영화를 보고 주제를 분석하는 활동을 좋아한다."}, {"id": 36, "cat": "사회", "text": "학교나 지역사회의 문제를 조사하고 개선안을 제안하고 싶다."}, {"id": 37, "cat": "공학", "text": "기술적 문제를 작은 단계로 나누어 해결하는 편이다."}, {"id": 38, "cat": "자연", "text": "우주나 지구의 형성과 변화 과정을 탐구하고 싶다."}, {"id": 39, "cat": "교육", "text": "누군가의 작은 성장이나 변화를 발견하면 기쁘다."}, {"id": 40, "cat": "예체능", "text": "공연이나 전시를 기획하는 과정이 흥미롭다."}, {"id": 41, "cat": "의약", "text": "건강 관련 정보를 근거에 따라 확인하는 것이 중요하다고 생각한다."}, {"id": 42, "cat": "인문", "text": "다른 시대 사람들의 생활과 생각을 이해하는 데 관심이 있다."}, {"id": 43, "cat": "사회", "text": "설문조사를 만들어 사람들의 의견을 분석해 보고 싶다."}, {"id": 44, "cat": "공학", "text": "로봇이나 자동화 시스템이 어떻게 움직이는지 궁금하다."}, {"id": 45, "cat": "자연", "text": "관찰 기록을 모아 일정한 규칙을 발견하는 일을 즐긴다."}, {"id": 46, "cat": "교육", "text": "배움이 어려운 사람을 위한 학습 자료를 만들어 보고 싶다."}, {"id": 47, "cat": "예체능", "text": "스포츠 기술을 반복 연습해 실력을 높이는 데 흥미가 있다."}, {"id": 48, "cat": "의약", "text": "혈액·세포·장기 등 인체의 구조를 배우는 것이 흥미롭다."}, {"id": 49, "cat": "인문", "text": "하나의 글을 여러 관점에서 해석하고 토론하는 것이 좋다."}, {"id": 50, "cat": "사회", "text": "국가 간 갈등이나 협력의 원인이 궁금하다."}, {"id": 51, "cat": "공학", "text": "설계도를 보고 실제 물건이 만들어지는 과정을 알고 싶다."}, {"id": 52, "cat": "자연", "text": "복잡한 현상을 수식이나 모형으로 표현하는 것이 흥미롭다."}, {"id": 53, "cat": "교육", "text": "여러 사람 앞에서 차근차근 설명하는 활동을 즐긴다."}, {"id": 54, "cat": "예체능", "text": "몸의 움직임과 운동 수행 능력을 향상하는 방법이 궁금하다."}, {"id": 55, "cat": "의약", "text": "환자의 상태를 세심하게 관찰하고 기록하는 활동에 관심이 있다."}, {"id": 56, "cat": "인문", "text": "자신의 생각을 설득력 있는 글로 정리하는 일을 즐긴다."}, {"id": 57, "cat": "사회", "text": "기업과 시장이 사회에 미치는 영향을 알아보고 싶다."}, {"id": 58, "cat": "공학", "text": "효율이 높은 구조나 시스템을 찾아 개선해 보고 싶다."}, {"id": 59, "cat": "자연", "text": "예상과 다른 실험 결과가 나오면 원인을 다시 살펴보고 싶다."}, {"id": 60, "cat": "교육", "text": "서로 다른 성격의 학생들이 함께 배우는 방법을 생각해 본다."}, {"id": 61, "cat": "예체능", "text": "다른 사람의 작품을 보며 표현 의도를 해석하는 것이 재미있다."}, {"id": 62, "cat": "의약", "text": "의료기기나 검사 기술이 진단에 쓰이는 원리가 궁금하다."}, {"id": 63, "cat": "인문", "text": "철학적 질문에 대해 오래 생각하고 의견을 나누는 편이다."}, {"id": 64, "cat": "사회", "text": "사회 현상에 대한 여러 집단의 입장을 비교하는 것이 재미있다."}, {"id": 65, "cat": "공학", "text": "센서나 전자회로를 활용한 장치를 만들어 보고 싶다."}, {"id": 66, "cat": "자연", "text": "현미경·망원경 등 관찰 도구를 활용해 보고 싶다."}, {"id": 67, "cat": "교육", "text": "학교에서 더 좋은 배움의 환경을 만드는 일에 관심이 있다."}, {"id": 68, "cat": "예체능", "text": "영상 편집이나 애니메이션 제작을 해 보고 싶다."}, {"id": 69, "cat": "의약", "text": "건강과 질병에 관한 연구 결과를 이해해 보고 싶다."}, {"id": 70, "cat": "인문", "text": "문학 작품 속 표현 기법을 찾아보는 것이 재미있다."}, {"id": 71, "cat": "사회", "text": "통계 자료로 사회 변화의 흐름을 파악하고 싶다."}, {"id": 72, "cat": "공학", "text": "컴퓨터 프로그램이나 앱의 구조를 이해하고 싶다."}, {"id": 73, "cat": "자연", "text": "환경 변화가 생태계에 주는 영향을 조사하고 싶다."}, {"id": 74, "cat": "교육", "text": "모르는 질문을 받으면 함께 찾아서 답을 알려주고 싶다."}, {"id": 75, "cat": "예체능", "text": "무대·공간·의상 등 시각적 연출에 관심이 있다."}, {"id": 76, "cat": "의약", "text": "생명과 안전을 다루는 일에서 책임감 있게 행동하려고 한다."}, {"id": 77, "cat": "인문", "text": "다양한 문화의 차이와 공통점을 탐색하고 싶다."}, {"id": 78, "cat": "사회", "text": "공공문제를 해결하기 위한 정책을 직접 설계해 보고 싶다."}, {"id": 79, "cat": "공학", "text": "실험 결과를 바탕으로 제품의 성능을 높이는 일이 흥미롭다."}, {"id": 80, "cat": "자연", "text": "과학 이론이 새로운 증거에 따라 바뀌는 과정이 흥미롭다."}, {"id": 81, "cat": "교육", "text": "기다려 주고 격려하는 태도가 학습에 중요하다고 생각한다."}, {"id": 82, "cat": "예체능", "text": "관객이나 사용자가 작품을 어떻게 경험할지 고민하는 편이다."}, {"id": 83, "cat": "의약", "text": "환자와 보호자의 이야기를 듣고 필요한 도움을 생각해 보고 싶다."}, {"id": 84, "cat": "인문", "text": "역사 자료나 기록을 읽고 사실을 재구성하는 과정이 즐겁다."}, {"id": 85, "cat": "사회", "text": "정치적 결정이 어떤 절차로 이루어지는지 관심이 있다."}, {"id": 86, "cat": "공학", "text": "다리·건물·교통시설 등의 구조적 안전에 관심이 있다."}, {"id": 87, "cat": "자연", "text": "통계나 데이터를 사용해 자연 현상을 분석해 보고 싶다."}, {"id": 88, "cat": "교육", "text": "한 가지 주제로 체험 활동이나 수업을 기획해 보고 싶다."}, {"id": 89, "cat": "예체능", "text": "오랫동안 연습해 표현이나 기량을 완성하는 과정이 의미 있다."}, {"id": 90, "cat": "의약", "text": "질병 진단을 위해 검사 결과를 종합적으로 해석하는 일에 관심이 있다."}, {"id": 91, "cat": "인문", "text": "번역에 따라 같은 문장의 의미가 달라지는 이유가 궁금하다."}, {"id": 92, "cat": "사회", "text": "광고나 미디어가 사람들의 생각에 미치는 영향을 조사하고 싶다."}, {"id": 93, "cat": "공학", "text": "수학적 원리를 활용해 실제 문제를 해결하는 데 흥미가 있다."}, {"id": 94, "cat": "자연", "text": "실험에서 변인을 통제하는 이유를 이해하고 적용하고 싶다."}, {"id": 95, "cat": "교육", "text": "사람마다 학습 속도와 방식이 다르다는 점을 이해하고 싶다."}, {"id": 96, "cat": "예체능", "text": "일상의 소재를 새로운 예술 작품으로 바꾸는 것이 좋다."}, {"id": 97, "cat": "의약", "text": "응급상황에서 침착하게 절차를 따르는 방법을 배우고 싶다."}, {"id": 98, "cat": "인문", "text": "한 사회의 가치관이 언어와 예술에 나타나는 방식에 관심이 있다."}, {"id": 99, "cat": "사회", "text": "갈등 상황에서 이해관계자들의 요구를 분석하는 편이다."}, {"id": 100, "cat": "공학", "text": "새로운 기술이 일상의 문제를 해결하는 방식에 관심이 있다."}, {"id": 101, "cat": "자연", "text": "어려운 과학 개념을 끝까지 파고드는 편이다."}, {"id": 102, "cat": "교육", "text": "아이들이 성장하며 사고방식이 변하는 과정이 궁금하다."}, {"id": 103, "cat": "예체능", "text": "팀과 함께 공연·경기·창작물을 완성하는 활동을 즐긴다."}, {"id": 104, "cat": "의약", "text": "의약품 개발 과정과 임상시험에 대해 알아보고 싶다."}, {"id": 105, "cat": "인문", "text": "주어진 자료에서 핵심 주장과 근거를 뽑아낼 자신이 있다."}, {"id": 106, "cat": "사회", "text": "지역 간 인구 변화나 불평등 문제의 원인을 살펴보고 싶다."}, {"id": 107, "cat": "공학", "text": "3D 모델링이나 도면 작성에 도전해 보고 싶다."}, {"id": 108, "cat": "자연", "text": "수학적 패턴을 발견하고 일반적인 규칙을 찾고 싶다."}, {"id": 109, "cat": "교육", "text": "공정한 평가 방법을 설계하는 데 관심이 있다."}, {"id": 110, "cat": "예체능", "text": "미술·음악·체육의 역사와 다양한 장르가 궁금하다."}, {"id": 111, "cat": "의약", "text": "영양·재활·예방 등 건강 증진 방법을 탐구하고 싶다."}, {"id": 112, "cat": "인문", "text": "글이나 발표에서 단어를 정확하게 선택하려고 노력한다."}, {"id": 113, "cat": "사회", "text": "경제·사회 이슈에 대해 근거를 들어 의견을 제시할 자신이 있다."}, {"id": 114, "cat": "공학", "text": "오류를 여러 번 수정하며 작동하는 결과물을 완성하는 편이다."}, {"id": 115, "cat": "자연", "text": "미생물·세포·유전 등 눈에 보이지 않는 세계가 궁금하다."}, {"id": 116, "cat": "교육", "text": "다른 사람과 지식을 나누기 위해 꾸준히 공부할 수 있다."}, {"id": 117, "cat": "예체능", "text": "결과물에 대한 피드백을 받아 작품이나 기량을 개선하고 싶다."}, {"id": 118, "cat": "의약", "text": "의료 윤리와 생명 존중에 대해 깊이 생각하는 편이다."}, {"id": 119, "cat": "인문", "text": "오래된 문헌이나 유적이 전하는 이야기를 조사하고 싶다."}, {"id": 120, "cat": "사회", "text": "공정한 규칙을 만들고 그 효과를 따져보는 일을 좋아한다."}, {"id": 121, "cat": "공학", "text": "에너지 사용을 줄이는 장치나 기술을 개발해 보고 싶다."}, {"id": 122, "cat": "자연", "text": "기후·지질·해양 현상을 탐구하는 활동에 관심이 있다."}, {"id": 123, "cat": "교육", "text": "어려운 내용을 그림이나 예시로 바꾸어 전달하는 편이다."}, {"id": 124, "cat": "예체능", "text": "내가 만든 콘텐츠로 사람들에게 감동이나 즐거움을 주고 싶다."}, {"id": 125, "cat": "의약", "text": "정확한 측정과 위생 수칙이 필요한 활동을 성실하게 할 수 있다."}, {"id": 126, "cat": "인문", "text": "사람이 삶의 의미와 윤리를 고민하는 이유를 탐구하고 싶다."}, {"id": 127, "cat": "사회", "text": "사회문제 해결을 위해 다른 사람과 협력하는 활동을 즐긴다."}, {"id": 128, "cat": "공학", "text": "기계·소프트웨어·전자기술을 연결하는 융합 프로젝트가 흥미롭다."}, {"id": 129, "cat": "자연", "text": "과학적 주장에 근거가 충분한지 판단하는 것을 좋아한다."}, {"id": 130, "cat": "교육", "text": "협력 학습이나 토론을 이끄는 역할에 관심이 있다."}, {"id": 131, "cat": "예체능", "text": "운동 전략이나 경기 기록을 분석해 수행을 개선하고 싶다."}, {"id": 132, "cat": "의약", "text": "의학·약학·보건 분야의 새로운 발전을 찾아보는 편이다."}, {"id": 133, "cat": "인문", "text": "읽고 배운 내용을 나만의 해석으로 설명하는 활동을 좋아한다."}, {"id": 134, "cat": "사회", "text": "현실의 사건을 사회과학 개념으로 설명해 보고 싶다."}, {"id": 135, "cat": "공학", "text": "필요한 기능과 조건을 정해 해결책을 설계하는 활동을 즐긴다."}, {"id": 136, "cat": "자연", "text": "새로운 발견을 위해 관찰과 실험을 반복하는 일이 가치 있다고 느낀다."}, {"id": 137, "cat": "교육", "text": "교육을 통해 개인과 사회가 변화하는 과정에 흥미를 느낀다."}, {"id": 138, "cat": "예체능", "text": "표현력이나 운동 능력을 꾸준히 발전시키는 활동을 선호한다."}, {"id": 139, "cat": "의약", "text": "과학 지식을 활용해 사람들의 건강 문제를 해결하고 싶다."}], "meta": {"인문": {"icon": "📚", "color": "#8b5cf6", "desc": "언어·문학·역사·철학·문화 탐구에 대한 관심", "majors": ["국어국문학과", "영어영문학과", "사학과", "철학과", "언어학과"], "activities": ["같은 주제의 작품 두 편 비교하기", "역사 사건의 상반된 해석 토론하기", "독서 후 나만의 비평문 작성하기"], "subjects": ["국어 관련 심화 과목", "외국어 관련 과목", "역사·문화 관련 과목"], "traits": "글과 말, 역사와 문화 속에서 사람과 사회의 의미를 해석하는 계열입니다. 책을 깊이 읽고 생각을 글로 정리하기를 좋아하며, 같은 사건도 여러 관점에서 바라보는 학생에게 잘 맞습니다. 비판적 사고력, 언어 감각, 공감 능력이 중요한 역량입니다.", "keywords": ["언어 감각", "비판적 읽기", "글쓰기", "공감과 해석"], "majorsInfo": [{"name": "국어국문학과", "desc": "한국어의 구조와 변화, 고전·현대 문학 작품을 연구하고 비평합니다.", "unis": {"s": ["서울대", "고려대", "연세대"], "n": ["부산대", "경북대", "전남대"], "p": ["영남대", "계명대", "동아대"], "note": ""}}, {"name": "영어영문학과", "desc": "영어학과 영미 문학·문화를 배우며 고급 영어 소통 능력을 기릅니다.", "unis": {"s": ["서울대", "연세대", "이화여대"], "n": ["부산대", "경북대", "충남대"], "p": ["인하대", "아주대", "영남대"], "note": ""}}, {"name": "사학과", "desc": "사료를 분석해 한국사·동양사·서양사의 흐름과 의미를 탐구합니다.", "unis": {"s": ["고려대", "연세대", "성균관대"], "n": ["부산대", "경북대", "충남대"], "p": ["동아대", "계명대", "영남대"], "note": ""}}, {"name": "철학과", "desc": "존재·지식·윤리·논리에 관한 근본 질문을 논증으로 탐구합니다.", "unis": {"s": ["서울대", "연세대", "서강대"], "n": ["부산대", "경북대", "전남대"], "p": ["영남대", "한림대", "가톨릭대"], "note": ""}}, {"name": "언어학과", "desc": "말소리·문법·의미 등 인간 언어의 보편 원리를 과학적으로 분석합니다.", "unis": {"s": ["서울대", "고려대", "한국외대(언어인지과학과)"], "n": ["부산대(언어정보학과)", "충남대"], "p": [], "note": "언어학과는 개설 대학이 적어 서울 외 사립대 개설 사례가 거의 없습니다."}}], "jobs": [{"name": "작가", "desc": "소설·시·에세이·시나리오 등 글을 창작해 책이나 콘텐츠로 발표합니다."}, {"name": "기자", "desc": "사건과 이슈를 취재·확인해 기사와 보도로 전달합니다."}, {"name": "출판 편집자", "desc": "원고를 기획·교정하고 책이 나오기까지 전 과정을 관리합니다."}, {"name": "번역가·통역사", "desc": "외국어로 된 글을 옮기거나 회의·행사에서 말을 실시간으로 통역합니다."}, {"name": "학예사(큐레이터)", "desc": "박물관·미술관에서 자료를 연구하고 전시를 기획·운영합니다."}, {"name": "카피라이터", "desc": "광고 문구와 브랜드 메시지를 짧고 인상적으로 씁니다."}, {"name": "국어·영어 교사", "desc": "중·고등학교에서 국어나 영어를 가르치고 학생을 지도합니다."}, {"name": "콘텐츠 기획자", "desc": "웹툰·영상·SNS 등 콘텐츠의 주제와 구성을 기획합니다."}]}, "사회": {"icon": "🌐", "color": "#2563eb", "desc": "사회현상·정책·경제·법·미디어를 분석하려는 관심", "majors": ["경제학과", "정치외교학과", "행정학과", "사회학과", "미디어커뮤니케이션학과"], "activities": ["지역 사회 문제에 관한 설문조사", "신문 기사 속 통계 검토하기", "가상의 정책 제안서 만들기"], "subjects": ["사회·문화 관련 과목", "정치·법 관련 과목", "경제 관련 과목"], "traits": "사회 현상과 제도, 경제와 미디어가 사람들의 삶에 미치는 영향을 분석하는 계열입니다. 뉴스와 시사에 관심이 많고, 자료와 근거로 주장하며 토론하기를 즐기는 학생에게 잘 맞습니다. 분석력, 의사소통 능력, 문제해결력이 중요한 역량입니다.", "keywords": ["시사 관심", "자료 분석", "토론과 설득", "리더십"], "majorsInfo": [{"name": "경제학과", "desc": "시장과 소비·생산, 국가 경제의 원리를 이론과 통계로 분석합니다.", "unis": {"s": ["서울대", "연세대", "고려대"], "n": ["부산대", "경북대", "충남대"], "p": ["아주대", "인하대", "영남대"], "note": ""}}, {"name": "정치외교학과", "desc": "권력과 정부, 국제 관계와 외교 정책을 비교·분석합니다.", "unis": {"s": ["서울대", "연세대", "고려대"], "n": ["부산대", "경북대", "충남대"], "p": ["인하대", "영남대", "동아대"], "note": ""}}, {"name": "행정학과", "desc": "정부와 공공기관의 정책 결정·조직·재정 운영을 배웁니다.", "unis": {"s": ["고려대", "연세대", "성균관대"], "n": ["부산대", "경북대", "충남대"], "p": ["아주대", "영남대", "동아대"], "note": ""}}, {"name": "사회학과", "desc": "가족·계층·도시 등 사회 구조와 집단 행동을 조사 방법으로 연구합니다.", "unis": {"s": ["서울대", "연세대", "고려대"], "n": ["부산대", "경북대", "전남대"], "p": ["영남대", "계명대", "한림대"], "note": ""}}, {"name": "미디어커뮤니케이션학과", "desc": "언론·광고·뉴미디어가 정보와 여론을 만드는 과정을 연구하고 제작합니다.", "unis": {"s": ["서울대(언론정보학과)", "고려대(미디어학부)", "성균관대"], "n": ["부산대", "경북대", "충남대(언론정보학과)"], "p": ["인하대", "한림대(미디어스쿨)", "영남대"], "note": ""}}], "jobs": [{"name": "공무원", "desc": "중앙·지방 정부에서 정책을 집행하고 국민에게 행정 서비스를 제공합니다."}, {"name": "외교관", "desc": "외국에서 국가를 대표해 협상하고 자국민을 보호합니다."}, {"name": "경제 분석가", "desc": "경제 지표와 시장 자료를 분석해 전망과 투자 판단을 돕습니다."}, {"name": "기자·PD", "desc": "뉴스와 시사·교양 프로그램을 취재하고 기획·제작합니다."}, {"name": "변호사", "desc": "법률 상담을 하고 소송에서 의뢰인을 대리합니다. 법학전문대학원을 거칩니다."}, {"name": "마케터", "desc": "소비자를 분석해 상품과 서비스를 알리는 전략을 세우고 실행합니다."}, {"name": "사회복지사", "desc": "도움이 필요한 사람과 가정을 상담하고 복지 서비스를 연결합니다."}, {"name": "정책 연구원", "desc": "사회 문제를 조사·분석해 정부와 기관에 정책 대안을 제시합니다."}]}, "공학": {"icon": "⚙️", "color": "#ea580c", "desc": "기술·설계·제작·프로그래밍으로 문제를 해결하는 관심", "majors": ["컴퓨터공학과", "기계공학과", "전자공학과", "건축공학과", "산업공학과"], "activities": ["일상 문제 해결용 앱 기획", "센서 또는 모형 제작 실습", "기술 제품 개선 아이디어 설계"], "subjects": ["수학 관련 심화 과목", "물리학 관련 과목", "정보·기술 관련 과목"], "traits": "과학과 수학 원리를 활용해 기술과 제품, 시스템을 설계하고 만드는 계열입니다. 기계를 분해해 보거나 프로그램을 만들며 직접 문제를 해결하기를 좋아하는 학생에게 잘 맞습니다. 수리·논리력, 설계 능력, 끈기 있는 문제해결력이 중요한 역량입니다.", "keywords": ["수리·논리", "만들기와 설계", "프로그래밍", "문제해결"], "majorsInfo": [{"name": "컴퓨터공학과", "desc": "소프트웨어·알고리즘·인공지능·네트워크 등 컴퓨팅 기술을 설계합니다.", "unis": {"s": ["서울대", "고려대", "연세대"], "n": ["부산대", "경북대", "충남대"], "p": ["아주대", "인하대", "영남대"], "note": ""}}, {"name": "기계공학과", "desc": "역학·열·유체 원리로 자동차·로봇·발전기 같은 기계 시스템을 설계합니다.", "unis": {"s": ["서울대", "한양대", "고려대"], "n": ["부산대", "경북대", "전남대"], "p": ["아주대", "인하대", "영남대"], "note": ""}}, {"name": "전자공학과", "desc": "반도체·회로·통신·신호처리 기술을 배우고 전자 기기를 개발합니다.", "unis": {"s": ["서울대", "고려대", "연세대"], "n": ["경북대", "부산대", "충남대"], "p": ["아주대", "인하대", "영남대"], "note": ""}}, {"name": "건축공학과", "desc": "건물의 구조 안전, 설비, 시공과 친환경 건축 기술을 다룹니다.", "unis": {"s": ["한양대", "연세대", "중앙대"], "n": ["부산대", "경북대", "충남대"], "p": ["인하대", "아주대", "영남대"], "note": ""}}, {"name": "산업공학과", "desc": "생산·물류·서비스 시스템을 데이터와 최적화 기법으로 효율화합니다.", "unis": {"s": ["서울대", "연세대", "고려대"], "n": ["부산대", "전남대", "경상국립대"], "p": ["아주대", "인하대", "영남대"], "note": ""}}], "jobs": [{"name": "소프트웨어 개발자", "desc": "앱·웹·시스템 프로그램을 설계하고 코드로 구현합니다."}, {"name": "AI 엔지니어", "desc": "데이터로 인공지능 모델을 학습시키고 서비스에 적용합니다."}, {"name": "반도체 공정 엔지니어", "desc": "반도체 칩을 만드는 공정을 설계·관리하고 수율을 높입니다."}, {"name": "기계 설계 엔지니어", "desc": "CAD로 기계 부품과 장비를 설계하고 성능을 시험합니다."}, {"name": "로봇 공학자", "desc": "산업·의료·서비스용 로봇의 구조와 제어 시스템을 개발합니다."}, {"name": "건축·토목 기술자", "desc": "건물·도로·교량을 설계하고 공사 현장의 안전과 품질을 관리합니다."}, {"name": "데이터 엔지니어", "desc": "대량의 데이터를 모으고 저장·처리하는 시스템을 구축합니다."}, {"name": "정보보안 전문가", "desc": "해킹과 정보 유출을 막기 위해 시스템을 점검하고 보호합니다."}]}, "자연": {"icon": "🔬", "color": "#059669", "desc": "과학적 관찰·실험·수학적 탐구를 즐기는 성향", "majors": ["수학과", "물리학과", "화학과", "생명과학과", "지구환경과학과"], "activities": ["실험 가설과 변인 설계", "공공 과학 데이터 분석", "과학적 주장에 대한 근거 검증"], "subjects": ["수학 관련 심화 과목", "과학 관련 심화 과목", "탐구·실험 관련 과목"], "traits": "자연 현상의 원리를 관찰·실험·수학으로 밝혀내는 기초과학 계열입니다. '왜 그럴까?'를 끝까지 파고들고, 실험과 데이터로 가설을 확인하기를 즐기는 학생에게 잘 맞습니다. 탐구심, 논리적 사고력, 꼼꼼한 관찰력이 중요한 역량입니다.", "keywords": ["탐구심", "실험과 관찰", "수학적 사고", "꼼꼼함"], "majorsInfo": [{"name": "수학과", "desc": "대수·해석·기하·확률 등 수학 이론을 엄밀한 증명으로 탐구합니다.", "unis": {"s": ["서울대", "고려대", "연세대"], "n": ["부산대", "경북대", "전남대"], "p": ["아주대", "인하대", "영남대"], "note": ""}}, {"name": "물리학과", "desc": "역학·전자기·양자·우주 등 물질과 에너지의 근본 법칙을 연구합니다.", "unis": {"s": ["서울대", "고려대", "연세대"], "n": ["부산대", "경북대", "충남대"], "p": ["아주대", "인하대", "영남대"], "note": ""}}, {"name": "화학과", "desc": "물질의 구조와 반응을 연구해 신소재·의약·에너지 분야의 기초를 다집니다.", "unis": {"s": ["서울대", "고려대", "연세대"], "n": ["부산대", "경북대", "충남대"], "p": ["아주대", "인하대", "영남대"], "note": ""}}, {"name": "생명과학과", "desc": "세포·유전자·생태계 등 생명 현상을 분자에서 개체까지 연구합니다.", "unis": {"s": ["서울대", "고려대", "연세대"], "n": ["부산대", "경북대", "충남대"], "p": ["아주대", "인하대", "영남대"], "note": ""}}, {"name": "지구환경과학과", "desc": "대기·해양·지질·기후 변화 등 지구 시스템을 관측하고 분석합니다.", "unis": {"s": ["서울대", "연세대", "고려대"], "n": ["부산대", "경북대", "전남대"], "p": [], "note": "지구과학 계열은 주로 국립대에 개설되어 있어 서울 외 사립대 사례가 드뭅니다."}}], "jobs": [{"name": "연구원", "desc": "대학·기업·국가 연구소에서 실험과 분석으로 새로운 지식과 기술을 만듭니다."}, {"name": "과학 교사", "desc": "중·고등학교에서 물리·화학·생명과학·지구과학을 가르칩니다."}, {"name": "데이터 과학자", "desc": "통계와 프로그래밍으로 데이터를 분석해 의사결정에 필요한 답을 찾습니다."}, {"name": "기상 연구원", "desc": "대기를 관측하고 기상·기후를 예측하는 모델을 연구합니다."}, {"name": "환경 컨설턴트", "desc": "대기·수질·토양 오염을 조사하고 기업과 기관에 개선 방안을 제시합니다."}, {"name": "보험계리사", "desc": "확률과 통계로 보험료와 위험을 계산하는 금융 전문가입니다."}, {"name": "바이오 연구원", "desc": "유전자·세포·미생물을 연구해 신약·진단·식품 기술을 개발합니다."}, {"name": "과학 커뮤니케이터", "desc": "전시·방송·글로 과학을 대중이 이해하기 쉽게 전달합니다."}]}, "교육": {"icon": "🧑‍🏫", "color": "#0d9488", "desc": "학습 지원·설명·성장·교육 설계에 대한 관심", "majors": ["교육학과", "초등교육과", "국어교육과", "수학교육과", "특수교육과"], "activities": ["또래 학습 도우미 활동", "5분 미니 수업 설계·시연", "학습자별 설명 방식 비교"], "subjects": ["희망 교과의 심화 과목", "심리·사회 관련 과목", "의사소통·탐구 관련 과목"], "traits": "사람이 배우고 성장하는 과정을 이해하고 돕는 계열입니다. 친구에게 설명해 주기를 좋아하고, 다른 사람의 변화에서 보람을 느끼는 학생에게 잘 맞습니다. 전달력, 공감 능력, 인내심과 책임감이 중요한 역량입니다.", "keywords": ["설명하기", "공감과 배려", "책임감", "성장 지원"], "majorsInfo": [{"name": "교육학과", "desc": "교육의 원리·심리·평가·제도를 연구하고 교육 프로그램을 설계합니다.", "unis": {"s": ["서울대", "연세대", "고려대"], "n": ["부산대", "경북대", "충남대"], "p": ["계명대", "영남대", "동아대"], "note": ""}}, {"name": "초등교육과", "desc": "초등학생 발달 특성과 전 교과 지도 방법을 배워 초등교사가 됩니다.", "unis": {"s": ["서울교대", "이화여대"], "n": ["경인교대", "공주교대", "한국교원대"], "p": [], "note": "초등교사는 교육대학·한국교원대·제주대·이화여대에서만 양성하므로 서울 외 사립대는 없습니다."}}, {"name": "국어교육과", "desc": "국어학·문학 지식과 국어 수업 방법을 함께 배워 중등교사를 양성합니다.", "unis": {"s": ["서울대", "고려대", "이화여대"], "n": ["한국교원대", "경북대", "부산대"], "p": ["단국대", "영남대", "원광대"], "note": ""}}, {"name": "수학교육과", "desc": "수학 내용 지식과 수학 수업·평가 방법을 배워 중등교사를 양성합니다.", "unis": {"s": ["서울대", "고려대", "이화여대"], "n": ["한국교원대", "경북대", "부산대"], "p": ["단국대", "대구대", "영남대"], "note": ""}}, {"name": "특수교육과", "desc": "장애 학생의 특성을 이해하고 개별화 교육과 통합교육 방법을 배웁니다.", "unis": {"s": ["이화여대"], "n": ["부산대", "공주대", "창원대"], "p": ["단국대", "대구대", "우석대"], "note": "서울 소재 4년제 중 특수교육과는 이화여대가 대표적입니다."}}], "jobs": [{"name": "초·중등 교사", "desc": "학교에서 교과를 가르치고 학생의 생활과 진로를 지도합니다."}, {"name": "특수교사", "desc": "장애 학생의 특성에 맞춘 개별화 교육을 계획하고 지도합니다."}, {"name": "교육 연구원", "desc": "교육 정책·교육과정·평가 방법을 연구하고 개발합니다."}, {"name": "교육 콘텐츠 개발자", "desc": "교재·이러닝·에듀테크 학습 콘텐츠를 기획하고 만듭니다."}, {"name": "기업 교육 담당자(HRD)", "desc": "회사 직원의 역량 개발을 위한 교육 프로그램을 설계·운영합니다."}, {"name": "상담교사", "desc": "학교에서 학생의 고민과 정서 문제를 상담하고 지원합니다."}, {"name": "진로진학 컨설턴트", "desc": "학생의 적성과 성적을 분석해 진로와 입시 전략을 안내합니다."}, {"name": "평생교육사", "desc": "성인과 지역 주민을 위한 평생학습 프로그램을 기획·운영합니다."}]}, "예체능": {"icon": "🎨", "color": "#db2777", "desc": "창작·표현·공연·디자인·운동 수행에 대한 관심", "majors": ["시각디자인학과", "음악학과", "체육학과", "연극영화학과", "산업디자인학과"], "activities": ["주제별 시각 포트폴리오 제작", "짧은 공연·영상 기획", "운동 수행 기록과 개선 계획"], "subjects": ["미술·음악·체육 관련 과목", "매체·콘텐츠 관련 과목", "관련 교과 심화 과목"], "traits": "미술·디자인·음악·공연·영상·운동으로 생각과 감정을 표현하고 수행하는 계열입니다. 손과 몸으로 직접 만들고 보여 주기를 즐기며, 꾸준한 연습을 견디는 학생에게 잘 맞습니다. 창의성, 감수성, 실기 능력과 자기관리가 중요한 역량입니다.", "keywords": ["창의적 표현", "감수성", "실기 역량", "꾸준한 연습"], "majorsInfo": [{"name": "시각디자인학과", "desc": "타이포그래피·브랜딩·영상·UX 등 시각 정보를 효과적으로 디자인합니다.", "unis": {"s": ["홍익대", "국민대", "이화여대"], "n": ["부산대", "경북대", "전남대"], "p": ["계명대", "동서대", "영남대"], "note": ""}}, {"name": "음악학과", "desc": "성악·기악·작곡 전공 실기와 음악 이론·역사를 함께 배웁니다.", "unis": {"s": ["서울대", "연세대", "이화여대"], "n": ["부산대", "경북대", "전남대"], "p": ["계명대", "영남대", "동아대"], "note": ""}}, {"name": "체육학과", "desc": "운동생리·스포츠 심리·트레이닝 이론과 종목 실기를 배웁니다.", "unis": {"s": ["한국체육대", "서울대", "연세대"], "n": ["부산대", "경북대", "충남대"], "p": ["용인대", "계명대", "영남대"], "note": ""}}, {"name": "연극영화학과", "desc": "연기·연출·촬영·시나리오 등 공연과 영상 제작 전 과정을 익힙니다.", "unis": {"s": ["한국예술종합학교", "중앙대", "동국대"], "n": ["부산대(예술문화영상학과)", "공주대(영상학과)"], "p": ["계명대", "경성대", "청주대"], "note": "서울 외 국립대는 연극영화학과 대신 영상 관련 학과로 운영하는 경우가 많습니다."}}, {"name": "산업디자인학과", "desc": "사용자를 고려해 제품·가구·모빌리티 등의 형태와 기능을 디자인합니다.", "unis": {"s": ["홍익대", "국민대", "서울과기대"], "n": ["부산대", "경북대", "전남대"], "p": ["계명대", "동서대", "영남대"], "note": ""}}], "jobs": [{"name": "그래픽·UX 디자이너", "desc": "포스터·브랜드·앱 화면 등을 사용자가 보기 쉽게 디자인합니다."}, {"name": "제품 디자이너", "desc": "생활용품·가전·가구 등 제품의 형태와 사용성을 디자인합니다."}, {"name": "웹툰 작가", "desc": "스토리를 구성하고 그림으로 연재 만화를 제작합니다."}, {"name": "연주자·작곡가", "desc": "악기나 노래로 공연하거나 새로운 곡을 만듭니다."}, {"name": "배우·연출가", "desc": "무대·영상에서 연기하거나 작품 전체를 지휘·연출합니다."}, {"name": "영상 감독·편집자", "desc": "영상을 기획·촬영하고 편집해 하나의 작품으로 완성합니다."}, {"name": "스포츠 트레이너", "desc": "운동선수와 일반인의 체력 향상·부상 예방 프로그램을 지도합니다."}, {"name": "체육 교사", "desc": "학교에서 체육 수업과 운동부·건강 교육을 담당합니다."}]}, "의약": {"icon": "🩺", "color": "#dc2626", "desc": "인체·건강·질병·의료·의약품에 대한 관심", "majors": ["의예과", "간호학과", "약학과", "물리치료학과", "임상병리학과"], "activities": ["질병 예방 캠페인 설계", "의약품 작용 원리 탐구", "의료 윤리 사례 토론"], "subjects": ["생명과학 관련 심화 과목", "화학 관련 심화 과목", "수학·통계 관련 과목"], "traits": "인체와 질병을 이해하고 사람의 건강을 지키고 회복시키는 계열입니다. 생명과학과 화학에 흥미가 있고, 아픈 사람을 돕는 일에 사명감을 느끼는 학생에게 잘 맞습니다. 과학적 이해력, 정확성, 생명 존중과 의료 윤리 의식이 중요한 역량입니다.", "keywords": ["생명 존중", "과학적 이해", "정확성", "봉사 정신"], "majorsInfo": [{"name": "의예과", "desc": "기초의학과 임상의학을 배워 질병을 진단·치료하는 의사가 됩니다.", "unis": {"s": ["서울대", "연세대", "고려대"], "n": ["부산대", "경북대", "전남대"], "p": ["계명대", "영남대", "아주대"], "note": ""}}, {"name": "간호학과", "desc": "환자 간호·건강 증진·지역사회 보건을 배워 간호사가 됩니다.", "unis": {"s": ["서울대", "연세대", "고려대"], "n": ["부산대", "경북대", "충남대"], "p": ["아주대", "인하대", "계명대"], "note": ""}}, {"name": "약학과", "desc": "의약품의 개발·작용·안전한 사용을 배워 약사와 신약 연구자가 됩니다.", "unis": {"s": ["서울대", "이화여대", "중앙대"], "n": ["부산대", "경북대", "충남대"], "p": ["영남대", "계명대", "아주대"], "note": ""}}, {"name": "물리치료학과", "desc": "운동·도수·전기 치료로 신체 기능 회복과 재활을 돕습니다.", "unis": {"s": ["삼육대"], "n": ["강원대", "한국교통대"], "p": ["연세대(미래캠퍼스)", "대구대", "건양대"], "note": "서울 소재 4년제 물리치료학과는 삼육대가 유일하며, 국립대 개설도 적습니다."}}, {"name": "임상병리학과", "desc": "혈액·조직·유전자 검사로 질병 진단에 필요한 정보를 분석합니다.", "unis": {"s": [], "n": [], "p": ["연세대(미래캠퍼스)", "건양대", "을지대"], "note": "4년제 임상병리학과는 대부분 서울 외 사립대에 개설되어 있습니다."}}], "jobs": [{"name": "의사", "desc": "환자를 진찰해 질병을 진단하고 치료합니다. 의대 6년과 수련 과정을 거칩니다."}, {"name": "간호사", "desc": "병원에서 환자를 돌보고 투약·처치와 건강 교육을 합니다."}, {"name": "약사", "desc": "처방에 따라 약을 조제하고 올바른 복용법을 안내합니다."}, {"name": "물리치료사", "desc": "운동·도수·전기 치료로 환자의 통증 완화와 재활을 돕습니다."}, {"name": "임상병리사", "desc": "혈액·소변·조직을 검사해 진단에 필요한 결과를 제공합니다."}, {"name": "제약 연구원", "desc": "신약 후보 물질을 찾고 효과와 안전성을 시험합니다."}, {"name": "보건교사", "desc": "학교에서 학생의 건강을 관리하고 응급 처치와 보건 교육을 합니다."}, {"name": "의료 데이터 분석가", "desc": "진료·건강 데이터를 분석해 의료 서비스 개선과 연구를 돕습니다."}]}}};
+const $=id=>document.getElementById(id);
+const Q=DATA.questions, META=DATA.meta, CATS=Object.keys(META);
+const LABELS=['전혀 그렇지 않다','그렇지 않다','보통이다','그렇다','매우 그렇다'];
+const PER=10, PAGES=Q.length/PER;
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const ss={get(k){try{return JSON.parse(sessionStorage.getItem(k))}catch(e){return null}},set(k,v){try{sessionStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{sessionStorage.removeItem(k)}catch(e){}}};
+const parseId=s=>{const m=/^([123])(\d{2})(\d{2})$/.exec(s);if(!m)return null;const g=+m[1],c=+m[2],n=+m[3];return c&&n?{g,c,n}:null};
+const idText=p=>`${p.g}학년 ${p.c}반 ${p.n}번`;
+const dl=(async()=>{try{return await window.claude?.use?.('downloads')}catch(e){return null}})();
+
+/* 설정: 배포 파일에 담긴 값 + 이 기기에서 관리자가 저장한 값 */
+let BAKED={roster:[],teachers:[]};try{BAKED=JSON.parse($('cfg').textContent)}catch(e){}
+const cfg=()=>store.get('cc7:cfg')||BAKED;
+const rosterIds=c=>{const o=[];(c.roster||[]).forEach(r=>{for(let n=1;n<=r.count;n++)o.push(`${r.g}${String(r.c).padStart(2,'0')}${String(n).padStart(2,'0')}`)});return o};
+
+let sid='', answers={}, page=0, done=null, staff=ss.get('cc7:staff'), clsSel='';
+
+const sumsOf=a=>CATS.map(c=>Q.filter(q=>q.cat===c).reduce((s,q)=>s+a[q.id],0));
+const score=s=>Math.round((s-20)/80*1000)/10;
+const rank=sums=>CATS.map((c,i)=>({cat:c,score:score(sums[i]),i})).sort((a,b)=>b.score-a.score||a.i-b.i);
+const dateText=d=>`20${d.slice(0,2)}.${d.slice(2,4)}.${d.slice(4,6)}`;
+
+/* 결과 코드: 학번-날짜-계열합계(36진수)-검증 */
+const hash=s=>{let h=7;for(const ch of s)h=(h*31+ch.charCodeAt(0))%1296;return h.toString(36).padStart(2,'0').toUpperCase()};
+const encode=(id,d,sums)=>{const body=`${id}-${d}-${sums.map(s=>(s-20).toString(36).padStart(2,'0')).join('').toUpperCase()}`;return `${body}-${hash(body)}`};
+function decode(code){const m=/^([123]\d{4})-(\d{6})-([0-9A-Z]{14})-([0-9A-Z]{2})$/.exec(code.toUpperCase());if(!m||!parseId(m[1]))return null;const body=`${m[1]}-${m[2]}-${m[3]}`;if(hash(body)!==m[4])return null;const sums=[];for(let i=0;i<7;i++){const v=parseInt(m[3].slice(i*2,i*2+2),36);if(!(v>=0&&v<=80))return null;sums.push(v+20)}return {id:m[1],date:m[2],sums}}
+
+/* 레이더 SVG */
+function radarSVG(scores,opt={}){const cx=300,cy=282,R=200,n=7;const pt=(i,f)=>[cx+R*f*Math.sin(2*Math.PI*i/n),cy-R*f*Math.cos(2*Math.PI*i/n)];const poly=f=>CATS.map((_,i)=>pt(i,f).map(v=>v.toFixed(1)).join(',')).join(' ');
+const grid='var(--line)';let s=[.25,.5,.75,1].map(f=>`<polygon points="${poly(f)}" fill="none" stroke="${grid}" stroke-width="1.5"/>`).join('');
+s+=CATS.map((_,i)=>{const[x,y]=pt(i,1);return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${grid}"/>`}).join('');
+s+=[25,50,75,100].map(v=>`<text x="${cx+6}" y="${cy-R*v/100+14}" font-size="12" fill="var(--mute)">${v}</text>`).join('');
+s+=`<polygon points="${CATS.map((c,i)=>pt(i,Math.max(.02,scores[i]/100)).join(',')).join(' ')}" fill="color-mix(in srgb,var(--pri) 22%,transparent)" stroke="var(--pri)" stroke-width="3" stroke-linejoin="round"/>`;
+s+=CATS.map((c,i)=>{const[x,y]=pt(i,Math.max(.02,scores[i]/100)),[lx,ly]=pt(i,1.17);return `<circle cx="${x}" cy="${y}" r="6" fill="${META[c].color}" stroke="var(--bg)" stroke-width="2"/><text x="${lx}" y="${ly-9}" text-anchor="middle" font-size="19" font-weight="800" fill="var(--ink)">${c}</text><text x="${lx}" y="${ly+13}" text-anchor="middle" font-size="15" font-weight="600" fill="${META[c].color}">${scores[i].toFixed(1)}</text>`}).join('');return s}
+const tags=a=>`<div class="tags">${a.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`;
+const uniRows=u=>`<div class="uni">${[['s','서울권'],['n','국립대'],['p','사립대']].map(([k,l])=>`<span>${l}</span>${u[k].length?esc(u[k].join(', ')):'<em>해당 학과 개설 사례가 드뭅니다</em>'}`).join('')}</div>${u.note?`<div class="unote">※ ${esc(u.note)}</div>`:''}`;
+function catDetail(c){const m=META[c];return `<div class="sub">계열 특성</div><div class="trait">${esc(m.traits)}</div>${tags(m.keywords.map(k=>'#'+k))}<div class="sub">학과 소개와 대표대학</div>${m.majorsInfo.map(j=>`<div class="mj"><b>${esc(j.name)}</b><p>${esc(j.desc)}</p>${uniRows(j.unis)}</div>`).join('')}<div class="jobs"><div class="sub">관련 직업 <span class="small" style="font-weight:400">· 누르면 설명이 나와요</span></div><div class="tags">${m.jobs.map((jb,k)=>`<button type="button" class="tag job" data-c="${c}" data-k="${k}">${esc(jb.name)}</button>`).join('')}</div><div class="jobDesc" hidden></div></div><div class="sub">해 볼 만한 탐색 활동</div>${tags(m.activities)}<div class="sub">눈여겨볼 선택과목</div>${tags(m.subjects)}`}
+const bars=list=>list.map(r=>`<div class="sc"><div class="l"><span><i class="dot" style="background:${META[r.cat].color}"></i>${r.cat}계열</span><span>${r.score.toFixed(1)}점</span></div><div class="t"><div style="width:${r.score}%;background:${META[r.cat].color}"></div></div></div>`).join('');
+
+
+
+
+
+/* 화면 */
+function show(v){['vStart','vExam','vResult','vTeacherLogin','vAdminLogin','vAdmin'].forEach(x=>$(x).classList.toggle('hidden',x!==v));
+$('navS').classList.toggle('on',v==='vStart');$('navI').classList.toggle('on',v==='vTeacherLogin');$('navT').classList.toggle('on',v==='vAdminLogin');
+const inS=sid&&(v==='vExam'||v==='vResult'),inA=v==='vAdmin';$('logout').classList.toggle('hidden',!(inS||inA));['navS','navI','navT'].forEach(x=>$(x).classList.toggle('hidden',inS||inA));
+$('who').textContent=inS?`${sid} 교육생`:inA&&staff?(staff.role==='admin'?'관리자':(staff.name||staff.email)+' 강사'):'';window.scrollTo(0,0)}
+$('navS').onclick=()=>show('vStart');
+$('navI').onclick=()=>{show('vTeacherLogin');setTimeout(()=>$('temail').focus(),50)};
+$('navT').onclick=()=>{show('vAdminLogin');setTimeout(()=>$('apw').focus(),50)};
+$('logout').onclick=()=>{if(!$('vAdmin').classList.contains('hidden')){const r=staff&&staff.role;staff=null;ss.del('cc7:staff');show(r==='teacher'?'vTeacherLogin':'vAdminLogin');return}
+sid='';answers={};done=null;$('sid').value='';$('parsed').textContent='학년 1자리 + 반 2자리 + 번호 2자리';show('vStart')};
+
+/* 교육생 */
+$('sid').addEventListener('input',e=>{const v=e.target.value.replace(/\D/g,'').slice(0,5);e.target.value=v;const p=parseId(v);$('parsed').textContent=p?idText(p):v.length===5?'학번 형식을 확인하세요':'학년 1자리 + 반 2자리 + 번호 2자리';$('startErr').textContent=''});
+$('sid').addEventListener('keydown',e=>{if(e.key==='Enter')$('spw').focus()});$('spw').addEventListener('keydown',e=>{if(e.key==='Enter')$('btnStart').click()});
+$('btnStart').onclick=()=>{const v=$('sid').value;if(!parseId(v)){$('startErr').textContent='학번 5자리를 정확히 입력하세요. 예: 1학년 2반 7번 → 10207';return}
+if($('spw').value!==STUDENT_PW){$('startErr').textContent='비밀번호가 맞지 않습니다.';return}
+const ids=rosterIds(cfg());if(ids.length&&!ids.includes(v)){$('startErr').textContent='등록되지 않은 학번입니다. 선생님께 문의하세요.';return}
+$('spw').value='';sid=v;const s=store.get('cc7:'+sid)||{};answers=s.answers||{};done=s.done||null;
+if(done){showResult();return}const f=Q.findIndex(q=>!answers[q.id]);page=Math.max(0,Math.floor((f<0?Q.length-1:f)/PER));renderExam()};
+function persist(){store.set('cc7:'+sid,{answers,done})}
+function progress(){const n=Object.keys(answers).length;$('fill').style.width=(n/Q.length*100)+'%';$('cnt').textContent=`${n} / ${Q.length}`;$('pgInfo').textContent=`${page+1} / ${PAGES}`}
+function renderExam(){show('vExam');$('examErr').textContent='';const qs=Q.slice(page*PER,page*PER+PER);
+$('qList').innerHTML=qs.map((q,i)=>`<div class="q" id="q${q.id}"><div class="qt"><i>${page*PER+i+1}</i>${esc(q.text)}</div><div class="ch" role="radiogroup">${LABELS.map((l,j)=>`<button type="button" role="radio" aria-checked="${answers[q.id]===j+1}" class="${answers[q.id]===j+1?'sel':''}" data-q="${q.id}" data-v="${j+1}"><b>${j+1}</b>${l}</button>`).join('')}</div></div>`).join('');
+$('prev').disabled=page===0;$('next').textContent=page===PAGES-1?'검사 완료 · 결과 보기':'다음 →';progress()}
+$('qList').addEventListener('click',e=>{const b=e.target.closest('button[data-q]');if(!b)return;answers[b.dataset.q]=+b.dataset.v;b.parentElement.querySelectorAll('button').forEach(x=>{const on=x===b;x.classList.toggle('sel',on);x.setAttribute('aria-checked',on)});persist();progress();$('examErr').textContent='';
+const nx=Q.slice(page*PER,page*PER+PER).find(q=>!answers[q.id]);if(nx){const el=$('q'+nx.id),r=el.getBoundingClientRect();if(r.top>window.innerHeight*.7||r.top<60)el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'})}});
+$('prev').onclick=()=>{if(page>0){page--;renderExam()}};
+$('next').onclick=()=>{const miss=Q.slice(page*PER,page*PER+PER).filter(q=>!answers[q.id]);if(miss.length){$('examErr').textContent=`이 페이지에 아직 답하지 않은 문항이 ${miss.length}개 있습니다.`;$('q'+miss[0].id).scrollIntoView({block:'center'});return}
+if(page<PAGES-1){page++;renderExam();return}
+if(Q.some(q=>!answers[q.id])){page=Math.floor(Q.findIndex(q=>!answers[q.id])/PER);renderExam();$('examErr').textContent='답하지 않은 문항이 있어 해당 페이지로 이동했습니다.';return}
+const d=new Date();done=String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');persist();showResult()};
+
+function showResult(){const sums=sumsOf(answers),r=rank(sums),p=parseId(sid);show('vResult');
+$('rWho').textContent=`${idText(p)} · 학번 ${sid} · ${dateText(done)} 완료`;
+$('rTitle').textContent=`나의 나침반은 ${r[0].cat}계열을 가리켜요`;
+$('rSub').textContent=`1순위 ${r[0].cat} · 2순위 ${r[1].cat}${r[0].score-r[1].score<5?' — 두 계열 점수 차이가 작아 함께 살펴보면 좋아요':''}`;
+$('radar').innerHTML=radarSVG(sums.map(score));$('rBars').innerHTML=bars(r);
+$('rTops').innerHTML=r.slice(0,2).map((x,i)=>`<div class="top3" style="--c:${META[x.cat].color}"><div class="rk">${i+1}순위 · ${x.score.toFixed(1)}점</div><h3>${x.cat}계열</h3>${catDetail(x.cat)}</div>`).join('');
+$('rOthers').innerHTML=r.slice(2).map(x=>`<details style="--c:${META[x.cat].color}"><summary>${x.cat}계열 · ${x.score.toFixed(1)}점</summary><div class="in">${catDetail(x.cat)}</div></details>`).join('');
+$('rCode').textContent=encode(sid,done,sums);$('codeMsg').textContent='';$('pdfMsg').textContent='';$('resetBox').innerHTML=''}
+$('copyCode').onclick=async()=>{try{await navigator.clipboard.writeText($('rCode').textContent);$('codeMsg').textContent='복사했습니다. 선생님께 보내 주세요.'}catch(e){$('codeMsg').textContent='복사가 막혀 있어요. 코드를 길게 눌러 직접 복사하세요.'}};
+$('resetBtn').onclick=()=>{$('resetBox').innerHTML=`<div class="confirm"><span style="flex:1 1 200px;font-size:14px">이 기기에 저장된 응답이 지워집니다. 계속할까요?</span><button id="rsYes" class="pri">지우고 다시 하기</button><button id="rsNo" class="ghost">취소</button></div>`;$('rsNo').onclick=()=>$('resetBox').innerHTML='';$('rsYes').onclick=()=>{store.del('cc7:'+sid);answers={};done=null;page=0;renderExam()}};
+
+/* 파일 저장 */
+async function saveFile(name,blob){const d=await dl;if(d){try{await d.save({filename:name,data:blob});return}catch(e){if(e&&e.code==='declined')throw new Error('저장을 취소했습니다.')}}
+const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);try{a.click()}catch(e){}a.remove();
+const bar=$('dlBar');bar.innerHTML=`<span>「${esc(name)}」 다운로드가 시작되지 않았다면 →</span> <a href="${url}" download="${esc(name)}" target="_blank" rel="noopener">여기를 눌러 저장</a><button type="button" class="ghost" id="dlX">닫기</button>`;bar.hidden=false;$('dlX').onclick=()=>{bar.hidden=true;URL.revokeObjectURL(url)}}
+
+/* PDF 결과지 (캔버스로 그려 이미지로 담음) */
+async function reportCanvas(id,date,sums){try{await document.fonts.load('800 40px "Gothic A1"');await document.fonts.load('400 20px "Gothic A1"')}catch(e){}
+const W=1240,H=1754,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');const F=(w,s)=>`${w} ${s}px "Gothic A1","Apple SD Gothic Neo","Malgun Gothic",sans-serif`;
+const T=(t,X,Y,w,s,col,al='left')=>{x.font=F(w,s);x.fillStyle=col;x.textAlign=al;x.fillText(t,X,Y)};
+const r=rank(sums),p=parseId(id),sc=sums.map(score);
+x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#2b3aa8';x.fillRect(0,0,W,300);
+T('나의 진로 나침반',90,120,800,56,'#fff');T('7계열 · 140문항 교육용 진로 탐색 결과지',90,175,400,28,'#dfe3ff');T(`${idText(p)}   ·   학번 ${id}   ·   ${dateText(date)} 완료`,90,240,600,26,'#fff');
+const cx=W/2,cy=640,R=250,n=7,pt=(i,f)=>[cx+R*f*Math.sin(2*Math.PI*i/n),cy-R*f*Math.cos(2*Math.PI*i/n)];
+const path=fs=>{x.beginPath();fs.forEach((f,i)=>{const[a,b]=pt(i,f);i?x.lineTo(a,b):x.moveTo(a,b)});x.closePath()};
+x.strokeStyle='#dfe3ef';x.lineWidth=2;[.25,.5,.75,1].forEach(f=>{path(Array(7).fill(f));x.stroke()});
+for(let i=0;i<n;i++){const[a,b]=pt(i,1);x.beginPath();x.moveTo(cx,cy);x.lineTo(a,b);x.stroke()}
+path(sc.map(v=>Math.max(.02,v/100)));x.fillStyle='rgba(58,75,201,.22)';x.fill();x.strokeStyle='#3a4bc9';x.lineWidth=5;x.lineJoin='round';x.stroke();
+CATS.forEach((ct,i)=>{const[a,b]=pt(i,Math.max(.02,sc[i]/100));x.beginPath();x.arc(a,b,9,0,7);x.fillStyle=META[ct].color;x.fill();const[la,lb]=pt(i,1.2);T(ct,la,lb-6,800,30,'#151b34','center');T(sc[i].toFixed(1),la,lb+28,600,24,META[ct].color,'center')});
+let y=1000;T('계열별 관심 점수',90,y,800,34,'#151b34');y+=40;
+r.forEach((s,k)=>{const yy=y+k*46;T(`${s.cat}계열`,90,yy+22,600,24,'#151b34');x.fillStyle='#f0f2fa';x.fillRect(260,yy+4,760,22);x.fillStyle=META[s.cat].color;x.fillRect(260,yy+4,760*s.score/100,22);T(`${s.score.toFixed(1)}점`,1150,yy+24,800,24,'#151b34','right')});
+y=1420;T('우선 탐색 계열 1·2순위',90,y,800,34,'#151b34');
+r.slice(0,2).forEach((s,k)=>{const bx=90+k*540,by=y+30,m=META[s.cat];x.fillStyle=m.color;x.fillRect(bx,by,500,8);T(`${k+1}순위  ${s.cat}계열`,bx,by+52,800,28,'#151b34');T(`${s.score.toFixed(1)}점`,bx,by+90,600,24,m.color);T(m.majors.slice(0,3).join(' · '),bx,by+130,400,21,'#5d6782');T(m.majors.slice(3).join(' · '),bx,by+162,400,21,'#5d6782')});
+T('자기보고식 교육용 관심 지표이며 표준화된 적성검사·백분위·합격 가능성 예측이 아닙니다. 상담 보조 자료로 활용하세요.',W/2,H-50,400,19,'#8a93ac','center');return c}
+function pageBase(id,cat,k,sc,part){const W=1240,H=1754,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),m=META[cat];const F=(w,s)=>`${w} ${s}px "Gothic A1","Apple SD Gothic Neo","Malgun Gothic",sans-serif`;
+const T=(t,X,Y,w,s,col,al='left')=>{x.font=F(w,s);x.fillStyle=col;x.textAlign=al;x.fillText(t,X,Y)};
+const wrap=(t,X,Y,maxW,w,s,col,lh)=>{x.font=F(w,s);let line='',yy=Y;for(const word of String(t).split(' ')){const test=line?line+' '+word:word;if(x.measureText(test).width>maxW&&line){T(line,X,yy,w,s,col);line=word;yy+=lh}else line=test}if(line){T(line,X,yy,w,s,col);yy+=lh}return yy};
+x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle=m.color;x.fillRect(0,0,W,200);
+T(`${k+1}순위 계열 상세 · ${part}`,90,74,600,26,'rgba(255,255,255,.88)');T(`${cat}계열`,90,148,800,58,'#fff');T(`${sc.toFixed(1)}점`,W-90,148,800,46,'#fff','right');T(`학번 ${id}`,W-90,74,600,24,'rgba(255,255,255,.88)','right');
+return {c,x,m,T,wrap,W,H}}
+function detailA(id,cat,k,sc){const {c,x,m,T,wrap,W,H}=pageBase(id,cat,k,sc,'특성과 학과');
+let y=272;T('계열 특성',90,y,800,32,'#151b34');y+=22;const top=y;x.fillStyle='#f2f4fc';x.fillRect(90,y,W-180,160);let ey=wrap(m.traits,118,y+46,W-236,400,23,'#151b34',36);y=Math.max(ey,top+160)+40;
+T(m.keywords.map(k=>'#'+k).join('   '),90,y,700,23,m.color);y+=62;
+T('학과 소개와 대표대학',90,y,800,32,'#151b34');T('서울권=서울 소재 · 국립/사립=서울 외 지역',W-90,y,400,18,'#8a93ac','right');y+=18;
+m.majorsInfo.forEach(j=>{x.fillStyle='#e1e5f2';x.fillRect(90,y,W-180,2);y+=40;T(j.name,90,y,800,26,'#151b34');y=wrap(j.desc,90,y+34,W-180,400,21,'#5d6782',30);
+[['s','서울권'],['n','국립대'],['p','사립대']].forEach(([kk,l])=>{T(l,90,y+2,800,19,m.color);T(j.unis[kk].length?j.unis[kk].join(', '):'해당 학과 개설 사례가 드뭅니다',180,y+2,400,19,j.unis[kk].length?'#151b34':'#8a93ac');y+=28});
+if(j.unis.note){y=wrap('※ '+j.unis.note,90,y+2,W-180,400,17,'#8a93ac',24)}y+=6});
+T('대표대학은 해당 학과 운영 대학의 예시(순위 아님)이며, 학과명·모집단위는 대학별 모집요강에서 확인하세요.',W/2,H-46,400,18,'#8a93ac','center');return c}
+function detailB(id,cat,k,sc){const {c,x,m,T,wrap,W,H}=pageBase(id,cat,k,sc,'직업과 활동');
+let y=272;T('관련 직업',90,y,800,32,'#151b34');y+=20;
+m.jobs.forEach(jb=>{x.fillStyle='#e1e5f2';x.fillRect(90,y,W-180,2);y+=42;x.fillStyle=m.color;x.fillRect(90,y-20,8,24);T(jb.name,112,y,800,25,'#151b34');y=wrap(jb.desc,112,y+34,W-202,400,21,'#5d6782',30)+4});
+y+=40;T('해 볼 만한 탐색 활동',90,y,800,28,'#151b34');T('눈여겨볼 선택과목',W/2+20,y,800,28,'#151b34');m.activities.forEach((a,i)=>T('· '+a,90,y+46+i*36,400,21,'#3a4160'));m.subjects.forEach((a,i)=>T('· '+a,W/2+20,y+46+i*36,400,21,'#3a4160'));
+T('자기보고식 교육용 관심 지표 결과입니다. 진로 상담의 보조 자료로 활용하세요.',W/2,H-46,400,18,'#8a93ac','center');return c}
+async function reportPDF(id,date,sums){const c=await reportCanvas(id,date,sums);const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});pdf.addImage(c.toDataURL('image/jpeg',.88),'JPEG',0,0,210,297);
+rank(sums).slice(0,2).forEach((r,k)=>{[detailA,detailB].forEach(fn=>{pdf.addPage();pdf.addImage(fn(id,r.cat,k,r.score).toDataURL('image/jpeg',.88),'JPEG',0,0,210,297)})});return pdf.output('blob')}
+
+
+
+
+$('pdfBtn').onclick=async()=>{const b=$('pdfBtn');b.disabled=true;$('pdfMsg').textContent='결과지를 만드는 중…';try{if(!window.jspdf)throw new Error('PDF 도구를 불러오지 못했어요. 인터넷 연결을 확인하세요.');await saveFile(`진로나침반_${sid}.pdf`,await reportPDF(sid,done,sumsOf(answers)));$('pdfMsg').textContent='저장했습니다.'}catch(e){$('pdfMsg').textContent=e.message}b.disabled=false};
+
+/* 강사·관리자 로그인 */
+$('apw').addEventListener('keydown',e=>{if(e.key==='Enter')$('aLogin').click()});
+$('aLogin').onclick=()=>{if($('apw').value!==ADMIN_PW){$('aErr').textContent='관리자 비밀번호가 맞지 않습니다.';return}$('apw').value='';$('aErr').textContent='';staff={role:'admin'};ss.set('cc7:staff',staff);openStaff()};
+$('temail').addEventListener('keydown',e=>{if(e.key==='Enter')$('tpw').focus()});$('tpw').addEventListener('keydown',e=>{if(e.key==='Enter')$('tLogin').click()});
+$('tLogin').onclick=()=>{const em=$('temail').value.trim().toLowerCase(),t=(cfg().teachers||[]).find(x=>x.email===em);
+if(!t){$('tErr').textContent='등록되지 않은 강사 아이디입니다. 관리자에게 등록을 요청하세요.';return}if($('tpw').value!==TEACHER_PW){$('tErr').textContent='비밀번호가 맞지 않습니다.';return}
+$('tpw').value='';$('tErr').textContent='';staff={role:'teacher',email:em,name:t.name||''};ss.set('cc7:staff',staff);openStaff()};
+
+/* 현황 */
+const codeKey=()=>'cc7:codes:'+(staff.role==='admin'?'admin':staff.email);
+let rows=[];
+function myClasses(){if(staff.role==='admin')return null;const t=(cfg().teachers||[]).find(x=>x.email===staff.email);return t?t.classes||[]:[]}
+function openStaff(){if(staff.role==='teacher'&&!(cfg().teachers||[]).find(x=>x.email===staff.email)){staff=null;ss.del('cc7:staff');show('vTeacherLogin');$('tErr').textContent='강사 등록이 해제되었습니다.';return}
+show('vAdmin');$('codes').value=store.get(codeKey())||'';if(staff.role==='admin'){loadCfgEditor()}build(true)}
+function build(quiet){const raw=$('codes').value,toks=raw.toUpperCase().match(/[0-9A-Z-]{20,}/g)||[],got=new Map();let bad=0,out=0;const mine=myClasses(),ok=k=>!mine||mine.includes(k);
+toks.forEach(t=>{const d=decode(t.trim());if(!d){bad++;return}const p=parseId(d.id);if(!ok(p.g+'-'+p.c)){out++;return}const o=got.get(d.id);if(!o||o.date<=d.date)got.set(d.id,d)});
+store.set(codeKey(),raw);const ids=rosterIds(cfg()).filter(id=>{const p=parseId(id);return ok(p.g+'-'+p.c)});const all=new Set([...ids,...got.keys()]);
+rows=[...all].sort().map(id=>{const p=parseId(id),d=got.get(id);return {id,...p,date:d?d.date:'',sums:d?d.sums:null,rank:d?rank(d.sums):null}});
+const msg=[];if(bad)msg.push(`형식이 맞지 않거나 잘린 코드 ${bad}개는 제외했습니다.`);if(out)msg.push(`담당반이 아닌 코드 ${out}개는 표시하지 않습니다.`);if(!quiet&&!toks.length)msg.push('읽을 수 있는 결과 코드가 없습니다.');$('admErr').textContent=msg.join(' ');renderStaff()}
+$('parseBtn').onclick=()=>build(false);
+$('clearBtn').onclick=()=>{$('codes').value='';build(true)};
+const stOf=r=>r.sums?'done':'new', stTxt={done:'제출 완료',new:'미제출'};
+const filt=()=>{const g=$('fG').value,c=$('fC').value,s=$('fS').value,q=$('fQ').value.trim();return rows.filter(r=>(!g||r.g==g)&&(!c||r.c==c)&&(!s||stOf(r)===s)&&(!q||r.id.includes(q)))};
+function fillSelects(){const gs=[...new Set(rows.map(r=>r.g))].sort(),gv=$('fG').value;$('fG').innerHTML='<option value="">전체 학년</option>'+gs.map(g=>`<option value="${g}" ${g==gv?'selected':''}>${g}학년</option>`).join('');
+const cs=[...new Set(rows.filter(r=>!$('fG').value||r.g==$('fG').value).map(r=>r.c))].sort((a,b)=>a-b),cv=$('fC').value;$('fC').innerHTML='<option value="">전체 반</option>'+cs.map(c=>`<option value="${c}" ${c==cv?'selected':''}>${c}반</option>`).join('')}
+function renderStaff(){const isA=staff.role==='admin',mine=myClasses();document.querySelectorAll('.adminOnly').forEach(x=>x.classList.toggle('hidden',!isA));
+$('staffWho').textContent=isA?'관리자 · 전체 학급':`${staff.name||staff.email} 강사 · 담당반 ${mine.map(k=>k.replace('-','학년 ')+'반').join(', ')||'없음 (관리자에게 담당반 지정을 요청하세요)'}`;$('who').textContent=isA?'관리자':(staff.name||staff.email)+' 강사';
+fillSelects();const f=filt(),n=f.length,dn=f.filter(r=>r.sums),hasRoster=rosterIds(cfg()).length>0;
+$('kpis').innerHTML=`<div class="kpi"><b>${n}</b><span>${hasRoster?'등록 교육생':'코드 받은 교육생'}</span></div><div class="kpi done"><b>${dn.length}</b><span>제출 완료${n?` · ${Math.round(dn.length/n*100)}%`:''}</span></div><div class="kpi"><b>${n-dn.length}</b><span>미제출</span></div><div class="kpi doing"><b>${rank((CATS.map((_,i)=>dn.length?dn.reduce((a,r)=>a+r.sums[i],0)/dn.length:20)))[0]&&dn.length?rank(CATS.map((_,i)=>dn.reduce((a,r)=>a+r.sums[i],0)/dn.length))[0].cat:'-'}</b><span>평균 1위 계열</span></div>`;
+const groups={};rows.forEach(r=>{const k=r.g+'-'+r.c;(groups[k]=groups[k]||{g:r.g,c:r.c,rs:[]}).rs.push(r)});
+$('classes').innerHTML=Object.values(groups).sort((a,b)=>a.g-b.g||a.c-b.c).map(G=>{const t=G.rs.length,d=G.rs.filter(r=>r.sums).length;return `<button class="cls ${clsSel===G.g+'-'+G.c?'on':''}" data-g="${G.g}" data-c="${G.c}">${G.g}학년 ${G.c}반 <span class="small">제출 ${d} / ${t}</span><div class="t"><i style="width:${d/t*100}%;background:#20b26b"></i></div></button>`}).join('')||`<p class="small">${isA?'아직 학급 편성이나 받은 코드가 없습니다. 아래 「학급 편성」을 먼저 저장하면 미제출 교육생도 보입니다.':'담당반 교육생이 아직 없습니다. 받은 결과 코드를 위에 붙여 넣으세요.'}</p>`;
+$('tBody').innerHTML=f.map(r=>{const s=stOf(r);return `<tr><td><b>${r.id}</b></td><td class="n">${r.g}</td><td class="n">${r.c}</td><td class="n">${r.n}</td><td><span class="pill st-${s}">${stTxt[s]}</span></td><td>${r.date?dateText(r.date):'-'}</td><td>${r.rank?r.rank[0].cat:'-'}</td><td>${r.rank?r.rank[1].cat:'-'}</td><td>${r.sums?`<button class="mini" data-pdf="${r.id}">PDF</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="9">표시할 교육생이 없습니다.</td></tr>';
+const avg=CATS.map((_,i)=>dn.length?Math.round(dn.reduce((a,r)=>a+score(r.sums[i]),0)/dn.length*10)/10:0);$('tRadar').innerHTML=radarSVG(avg);
+const cnt=CATS.map(c=>({cat:c,k:dn.filter(r=>r.rank[0].cat===c).length})).sort((a,b)=>b.k-a.k);
+$('tDist').innerHTML=dn.length?cnt.map(x=>`<div class="sc"><div class="l"><span><i class="dot" style="background:${META[x.cat].color}"></i>${x.cat}계열</span><span>${x.k}명 · ${Math.round(x.k/dn.length*100)}%</span></div><div class="t"><div style="width:${x.k/dn.length*100}%;background:${META[x.cat].color}"></div></div></div>`).join(''):'<p class="small">아직 제출한 교육생이 없습니다.</p>';
+$('zipBtn').textContent=`제출자 결과 PDF 일괄 다운로드 (ZIP · ${dn.length}명)`;$('zipBtn').disabled=!dn.length}
+$('classes').onclick=e=>{const b=e.target.closest('.cls');if(!b)return;const k=b.dataset.g+'-'+b.dataset.c;if(clsSel===k){clsSel='';$('fG').value='';fillSelects();$('fC').value=''}else{clsSel=k;$('fG').value=b.dataset.g;fillSelects();$('fC').value=b.dataset.c}renderStaff()};
+['fG','fC','fS'].forEach(id=>$(id).onchange=()=>{clsSel=$('fG').value&&$('fC').value?$('fG').value+'-'+$('fC').value:'';renderStaff()});$('fQ').oninput=renderStaff;
+$('tBody').onclick=async e=>{const p=e.target.closest('[data-pdf]');if(!p)return;const r=rows.find(x=>x.id===p.dataset.pdf);p.disabled=true;try{await saveFile(`진로나침반_${r.id}.pdf`,await reportPDF(r.id,r.date,r.sums))}catch(err){$('aMsg').textContent=err.message}p.disabled=false};
+const csv=()=>'﻿'+[['학번','학년','반','번호','상태','완료일',...CATS.map(c=>c+' 점수'),'1순위','2순위'],...filt().map(r=>[r.id,r.g,r.c,r.n,stTxt[stOf(r)],r.date?dateText(r.date):'',...(r.sums?r.sums.map(s=>score(s).toFixed(1)):CATS.map(()=>'')),...(r.rank?[r.rank[0].cat,r.rank[1].cat]:['',''])])].map(l=>l.join(',')).join('\r\n');
+$('csvBtn').onclick=async()=>{try{await saveFile('진로나침반_제출현황.csv',new Blob([csv()],{type:'text/csv'}));$('aMsg').textContent='CSV를 저장했습니다.'}catch(e){$('aMsg').textContent=e.message}};
+$('zipBtn').onclick=async()=>{const b=$('zipBtn'),s=filt().filter(r=>r.sums);if(!window.JSZip||!window.jspdf){$('aMsg').textContent='도구를 불러오지 못했어요. 인터넷 연결을 확인하세요.';return}b.disabled=true;try{const z=new JSZip();z.file('제출현황.csv',csv());for(let i=0;i<s.length;i++){$('aMsg').textContent=`PDF 만드는 중… ${i+1} / ${s.length}`;z.file(`PDF/${s[i].g}학년${s[i].c}반_${s[i].id}.pdf`,await reportPDF(s[i].id,s[i].date,s[i].sums))}$('aMsg').textContent='압축하는 중…';await saveFile(`진로나침반_결과PDF_${s.length}명.zip`,await z.generateAsync({type:'blob'}));$('aMsg').textContent=`${s.length}명의 결과 PDF를 저장했습니다.`}catch(e){$('aMsg').textContent=e.message}b.disabled=false};
+
+/* 관리자 설정: 학급 편성 + 강사 */
+let roster=[],teachers=[];
+function loadCfgEditor(){const c=cfg();roster=(c.roster||[]).map(x=>({...x}));teachers=(c.teachers||[]).map(x=>({...x,classes:[...(x.classes||[])]}));drawRoster();drawTeachers();
+$('cfgMsg').textContent=store.get('cc7:cfg')&&JSON.stringify(store.get('cc7:cfg'))!==JSON.stringify(BAKED)?'이 기기의 설정이 배포 파일과 다릅니다. 강사들이 쓰려면 「배포용 HTML 저장」 후 파일을 다시 올려 주세요.':''}
+function drawRoster(){$('rosterRows').innerHTML=roster.map((r,i)=>`<div class="rosterRow"><b style="width:22px">${i+1}</b><label style="margin:0;display:flex;gap:6px;align-items:center">학년<select data-i="${i}" data-k="g">${[1,2,3].map(v=>`<option ${r.g==v?'selected':''}>${v}</option>`).join('')}</select></label><label style="margin:0;display:flex;gap:6px;align-items:center">반<input type="number" min="1" max="99" data-i="${i}" data-k="c" value="${r.c}"></label><label style="margin:0;display:flex;gap:6px;align-items:center">인원<input type="number" min="1" max="99" data-i="${i}" data-k="count" value="${r.count}"></label><button class="ghost" data-del="${i}" style="min-height:40px;padding:8px 12px">삭제</button></div>`).join('')||'<p class="small">등록된 학급이 없습니다.</p>'}
+$('rosterRows').oninput=e=>{const el=e.target;if(el.dataset.i!==undefined){roster[+el.dataset.i][el.dataset.k]=+el.value;drawTeachersSoon()}};
+$('rosterRows').onclick=e=>{const b=e.target.closest('[data-del]');if(b){roster.splice(+b.dataset.del,1);drawRoster();drawTeachers()}};
+$('addCls').onclick=()=>{const last=roster[roster.length-1]||{g:1,c:0,count:30};roster.push({g:last.g,c:Math.min(99,Math.max(0,...roster.filter(x=>x.g===last.g).map(x=>x.c))+1),count:last.count});drawRoster();drawTeachers()};
+let dtT;const drawTeachersSoon=()=>{clearTimeout(dtT);dtT=setTimeout(drawTeachers,400)};
+function drawTeachers(){const ks=[...new Set(roster.filter(r=>r.g&&r.c).map(r=>r.g+'-'+r.c))];$('teacherRows').innerHTML=teachers.map((t,i)=>`<div class="tlist"><div class="row"><input type="text" class="pwin" data-ti="${i}" data-tk="email" placeholder="강사 이메일 (아이디)" value="${esc(t.email||'')}" inputmode="email"><input type="text" class="pwin" data-ti="${i}" data-tk="name" placeholder="이름" value="${esc(t.name||'')}" style="flex:0 1 160px"><button class="ghost" data-tdel="${i}" style="flex:none;min-height:44px">삭제</button></div><div class="chk">${ks.length?ks.map(k=>`<label><input type="checkbox" data-ti="${i}" data-cls="${k}" ${t.classes.includes(k)?'checked':''}>${k.replace('-','학년 ')}반</label>`).join(''):'<span class="small">학급 편성에 학급을 추가하면 담당반을 고를 수 있습니다.</span>'}</div></div>`).join('')||'<p class="small">등록된 강사가 없습니다.</p>'}
+$('teacherRows').oninput=e=>{const el=e.target;if(el.dataset.tk)teachers[+el.dataset.ti][el.dataset.tk]=el.value};
+$('teacherRows').onchange=e=>{const el=e.target;if(el.dataset.cls){const t=teachers[+el.dataset.ti];t.classes=t.classes.filter(k=>k!==el.dataset.cls);if(el.checked)t.classes.push(el.dataset.cls)}};
+$('teacherRows').onclick=e=>{const b=e.target.closest('[data-tdel]');if(b){teachers.splice(+b.dataset.tdel,1);drawTeachers()}};
+$('addT').onclick=()=>{teachers.push({email:'',name:'',classes:[]});drawTeachers()};
+function validCfg(){const seenC={},seenT={};for(const r of roster){if(!(r.g>=1&&r.g<=3)||!(r.c>=1&&r.c<=99)||!(r.count>=1&&r.count<=99))throw new Error('학년은 1~3, 반과 인원은 1~99로 입력하세요.');if(seenC[r.g+'-'+r.c])throw new Error(`${r.g}학년 ${r.c}반이 중복되었습니다.`);seenC[r.g+'-'+r.c]=1}
+const ts=[];for(const t of teachers){const em=String(t.email||'').trim().toLowerCase();if(!em)continue;if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))throw new Error('이메일 형식을 확인하세요: '+em);if(seenT[em])throw new Error('중복된 강사 아이디: '+em);seenT[em]=1;ts.push({email:em,name:String(t.name||'').trim().slice(0,30),classes:t.classes.filter(k=>seenC[k])})}
+return {roster:roster.map(r=>({g:+r.g,c:+r.c,count:+r.count})),teachers:ts}}
+$('saveCfg').onclick=()=>{try{const c=validCfg();if(!store.set('cc7:cfg',c))throw new Error('이 화면에서는 저장소가 막혀 있어 저장할 수 없습니다. 「배포용 HTML 저장」을 이용하세요.');loadCfgEditor();build(true);$('cfgMsg').textContent=`이 기기에 저장했습니다 (학급 ${c.roster.length}개, 강사 ${c.teachers.length}명). 강사들이 다른 기기에서 로그인하려면 「배포용 HTML 저장」 후 파일을 다시 올려 주세요.`}catch(e){$('cfgMsg').textContent=e.message}};
+$('bakeBtn').onclick=async()=>{const b=$('bakeBtn');b.disabled=true;try{const c=validCfg();let src='';try{const r=await fetch(location.href.split('#')[0],{cache:'no-store'});const t=r.ok?await r.text():'';if(t.includes('id="cfg"')&&t.includes('PRISTINE'))src=t}catch(e){}
+if(!src)src=PRISTINE;const json=JSON.stringify(c).replace(/</g,'\\u003c');const out=src.replace(/(<script type="application\/json" id="cfg">)[\s\S]*?(<\/script>)/,(m,a,z)=>a+json+z);
+if(out===src&&!src.includes(json))throw new Error('배포 파일을 만들지 못했습니다.');store.set('cc7:cfg',c);await saveFile('index.html',new Blob([out],{type:'text/html'}));$('cfgMsg').textContent=`설정이 들어간 index.html을 저장했습니다 (학급 ${c.roster.length}개, 강사 ${c.teachers.length}명). 기존에 올린 파일 대신 이 파일을 올리면 모든 기기에 적용됩니다.`}catch(e){$('cfgMsg').textContent=e.message}b.disabled=false};
+
+/* 직업 설명 */
+document.addEventListener('click',e=>{const j=e.target.closest('button.job');if(!j)return;const box=j.closest('.jobs').querySelector('.jobDesc'),jb=META[j.dataset.c].jobs[+j.dataset.k],on=j.classList.contains('on');j.closest('.jobs').querySelectorAll('button.job').forEach(x=>x.classList.remove('on'));if(on){box.hidden=true;return}j.classList.add('on');box.hidden=false;box.innerHTML=`<b>${esc(jb.name)}</b>${esc(jb.desc)}`});
+
+/* 나침반 그림 */
+(()=>{const cx=220,cy=220,R=178,n=7;const pt=(i,r,o=0)=>[cx+r*Math.sin(2*Math.PI*(i+o)/n),cy-r*Math.cos(2*Math.PI*(i+o)/n)];let s=`<circle cx="${cx}" cy="${cy}" r="${R+28}" fill="var(--soft)"/><circle cx="${cx}" cy="${cy}" r="${R+28}" fill="none" stroke="var(--line)" stroke-width="2"/>`;
+CATS.forEach((c,i)=>{const[a,b]=pt(i,R,-.5),[d,e]=pt(i,R,.5);s+=`<path d="M${cx},${cy}L${a},${b}L${d},${e}Z" fill="${META[c].color}" opacity=".9"/>`});
+s+=`<polygon points="${CATS.map((_,i)=>pt(i,R*.55,-.5).join(',')).join(' ')}" fill="var(--bg)" opacity=".92"/>`;
+CATS.forEach((c,i)=>{const[a,b]=pt(i,R*.76);s+=`<text x="${a}" y="${b+6}" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">${c}</text>`});
+s+=`<g class="needle"><path d="M${cx},${cy-82}L${cx+13},${cy}L${cx-13},${cy}Z" fill="#ff6b4a"/><path d="M${cx},${cy+82}L${cx+13},${cy}L${cx-13},${cy}Z" fill="var(--ink)"/></g><circle cx="${cx}" cy="${cy}" r="9" fill="var(--bg)" stroke="var(--ink)" stroke-width="3"/>`;$('compass').innerHTML=s})();
+
+
+
+if(staff)openStaff();
+}
+</script>
+</body></html>
